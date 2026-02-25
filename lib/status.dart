@@ -126,7 +126,7 @@ class _StatusScreenState extends State<_StatusScreen> {
                 key: ValueKey(chain.id),
                 controller: _scrollController,
                 index: index,
-                highlightColor: Colors.white.withOpacity(1),
+                highlightColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
                 child: TweetConversation(id: chain.id, tweets: chain.tweets, username: null, isPinned: chain.isPinned),
               );
             },

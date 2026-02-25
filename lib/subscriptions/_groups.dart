@@ -59,7 +59,7 @@ class _SubscriptionGroupsState extends State<SubscriptionGroups> {
             Expanded(
                 child: Container(
               alignment: Alignment.center,
-              color: color != null ? color.withOpacity(0.4) : Colors.white10,
+              color: color != null ? color.withOpacity(0.4) : Theme.of(context).colorScheme.surfaceContainerHighest,
               width: double.infinity,
               padding: const EdgeInsets.all(8),
               child: Text(title,

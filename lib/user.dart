@@ -124,7 +124,7 @@ class _FollowButtonSelectGroupDialogState extends State<FollowButtonSelectGroupD
     var groupModel = context.read<GroupsModel>();
     var subscriptionsModel = context.read<SubscriptionsModel>();
 
-    var color = Theme.of(context).brightness == Brightness.dark ? Colors.white70 : Colors.black54;
+    var color = Theme.of(context).colorScheme.onSurfaceVariant;
 
     return MultiSelectDialog(
       title: Row(

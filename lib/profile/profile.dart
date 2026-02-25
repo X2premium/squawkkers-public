@@ -254,6 +254,11 @@ class _ProfileScreenBodyState extends State<ProfileScreenBody> with TickerProvid
     var profileStuffTop = bannerHeight + 36;
 
     var theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final headerPrimaryColor = isDark ? Colors.white : theme.colorScheme.onSurface;
+    final headerSecondaryColor = isDark ? Colors.white70 : theme.colorScheme.onSurfaceVariant;
+    final headerGradientBottom = isDark ? const Color(0xDD000000) : const Color(0xDDEEF2F5);
+    final headerGradientTop = isDark ? const Color(0x80000000) : const Color(0x99F6F4F0);
 
     var banner = user.profileBannerUrl;
     var bannerImage = banner == null
@@ -314,14 +319,14 @@ class _ProfileScreenBodyState extends State<ProfileScreenBody> with TickerProvid
                   background: SafeArea(
                   top: false,
                   child: DefaultTextStyle.merge(
-                    style: const TextStyle(color: Colors.white),
+                    style: TextStyle(color: headerPrimaryColor),
                     child: Stack(fit: StackFit.expand, children: <Widget>[
-                      const DecoratedBox(
+                      DecoratedBox(
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             begin: Alignment.bottomCenter,
                             end: Alignment.topCenter,
-                            colors: <Color>[Color(0xDD000000), Color(0x80000000)],
+                            colors: <Color>[headerGradientBottom, headerGradientTop],
                           ),
                         ),
                       ),
@@ -353,7 +358,7 @@ class _ProfileScreenBodyState extends State<ProfileScreenBody> with TickerProvid
                                     Container(
                                       margin: const EdgeInsets.only(bottom: 8),
                                       child: Text('@${(user.screenName!)}',
-                                          style: const TextStyle(fontSize: 14, color: Colors.white70)),
+                                          style: TextStyle(fontSize: 14, color: headerSecondaryColor)),
                                     ),
                                     if (user.description != null && user.description!.isNotEmpty)
                                       MeasureSize(
@@ -392,7 +397,7 @@ class _ProfileScreenBodyState extends State<ProfileScreenBody> with TickerProvid
                                                   child: Row(
                                                     crossAxisAlignment: CrossAxisAlignment.center,
                                                     children: [
-                                                      const Icon(Icons.person_rounded, size: 12, color: Colors.white),
+                                                      Icon(Icons.person_rounded, size: 12, color: headerSecondaryColor),
                                                       const SizedBox(width: 4),
                                                       Text.rich(TextSpan(children: [
                                                         TextSpan(
@@ -417,7 +422,7 @@ class _ProfileScreenBodyState extends State<ProfileScreenBody> with TickerProvid
                                                   child: Row(
                                                     crossAxisAlignment: CrossAxisAlignment.center,
                                                     children: [
-                                                      const Icon(Icons.person_rounded, size: 12, color: Colors.white),
+                                                      Icon(Icons.person_rounded, size: 12, color: headerSecondaryColor),
                                                       const SizedBox(width: 4),
                                                       Text.rich(TextSpan(children: [
                                                         TextSpan(
@@ -438,8 +443,8 @@ class _ProfileScreenBodyState extends State<ProfileScreenBody> with TickerProvid
                                                 child: Row(
                                                   crossAxisAlignment: CrossAxisAlignment.center,
                                                   children: [
-                                                    const Icon(Icons.location_on_rounded,
-                                                        size: 12, color: Colors.white),
+                                                    Icon(Icons.location_on_rounded,
+                                                        size: 12, color: headerSecondaryColor),
                                                     const SizedBox(width: 4),
                                                     Text(user.location!, style: metadataTextStyle),
                                                   ],
@@ -451,7 +456,7 @@ class _ProfileScreenBodyState extends State<ProfileScreenBody> with TickerProvid
                                                 child: Row(
                                                   crossAxisAlignment: CrossAxisAlignment.center,
                                                   children: [
-                                                    const Icon(Icons.link_rounded, size: 12, color: Colors.white),
+                                                    Icon(Icons.link_rounded, size: 12, color: headerSecondaryColor),
                                                     const SizedBox(width: 4),
                                                     Builder(builder: (context) {
                                                       var url = user.entities?.url?.urls
@@ -484,8 +489,8 @@ class _ProfileScreenBodyState extends State<ProfileScreenBody> with TickerProvid
                                                 child: Row(
                                                   crossAxisAlignment: CrossAxisAlignment.center,
                                                   children: [
-                                                    const Icon(Icons.calendar_today_rounded,
-                                                        size: 12, color: Colors.white),
+                                                    Icon(Icons.calendar_today_rounded,
+                                                        size: 12, color: headerSecondaryColor),
                                                     const SizedBox(width: 4),
                                                     Text(
                                                         L10n.of(context)
@@ -525,10 +530,10 @@ class _ProfileScreenBodyState extends State<ProfileScreenBody> with TickerProvid
                           children:[
                             IconButton(
                               icon: const Icon(Symbols.search),
-                              color: Colors.white,
+                              color: headerPrimaryColor,
                               onPressed: () => pushNamedRoute(context, routeSearch, SearchArguments(1, focusInputOnOpen: true, query: 'from:@${user.screenName!} ')),
                             ),
-                            FollowButton(user: UserSubscription.fromUser(user), color: Colors.white),
+                            FollowButton(user: UserSubscription.fromUser(user), color: headerPrimaryColor),
                           ],
                         ),
                       ),
