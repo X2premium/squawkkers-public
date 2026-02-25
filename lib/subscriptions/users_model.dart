@@ -78,8 +78,17 @@ class SubscriptionsModel extends Store<List<Subscription>> {
       var database = await Repository.writable();
 
       var ids = (await database.query(tableSubscription, columns: ['id'])).map((e) => e['id'] as String).toList();
+      if (ids.isEmpty) {
+        return state;
+      }
 
-      var users = await Twitter.getUsers(ids);
+      List<UserWithExtra> users = [];
+      try {
+        users = await Twitter.getUsers(ids);
+      } catch (e) {
+        log.warning('Unable to refresh subscription data: $e');
+        return state;
+      }
 
       var batch = database.batch();
       for (var user in users) {

@@ -29,13 +29,57 @@ class _SubscriptionImportScreenState extends State<SubscriptionImportScreen> {
   String? _specificScreenNames;
   StreamController<int>? _streamController;
 
+  String _normalizeRawScreenName(String value) {
+    var screenName = value.trim();
+    if (screenName.isEmpty) {
+      return '';
+    }
+
+    if (screenName.startsWith('http://') || screenName.startsWith('https://')) {
+      var uri = Uri.tryParse(screenName);
+      if (uri != null && uri.pathSegments.isNotEmpty) {
+        screenName = uri.pathSegments.first;
+      }
+    }
+
+    if (screenName.startsWith('@')) {
+      screenName = screenName.substring(1);
+    }
+
+    return screenName.replaceAll(RegExp(r'[^a-zA-Z0-9_]'), '');
+  }
+
+  String? _normalizeScreenName(String? value) {
+    if (value == null) {
+      return null;
+    }
+    var normalized = _normalizeRawScreenName(value);
+    return normalized.isEmpty ? null : normalized;
+  }
+
+  List<String> _normalizeScreenNames(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return [];
+    }
+
+    return value
+        .split(',')
+        .map(_normalizeRawScreenName)
+        .where((e) => e.isNotEmpty)
+        .toSet()
+        .toList(growable: false);
+  }
+
   Future importSubscriptions() async {
     setState(() {
       _streamController = StreamController();
     });
 
     try {
-      if ((_fromScreenName?.trim().isEmpty ?? true) && (_specificScreenNames?.trim().isEmpty ?? true)) {
+      var fromScreenName = _normalizeScreenName(_fromScreenName);
+      var specificScreenNames = _normalizeScreenNames(_specificScreenNames);
+
+      if (fromScreenName == null && specificScreenNames.isEmpty) {
         return;
       }
 
@@ -50,10 +94,10 @@ class _SubscriptionImportScreenState extends State<SubscriptionImportScreen> {
 
       var createdAt = DateTime.now();
 
-      if (_fromScreenName?.trim().isNotEmpty ?? false) {
+      if (fromScreenName != null) {
         while (true) {
           var response = await Twitter.getProfileFollows(
-            _fromScreenName!,
+            fromScreenName,
             'following',
             cursor: cursor,
           );
@@ -86,14 +130,14 @@ class _SubscriptionImportScreenState extends State<SubscriptionImportScreen> {
         }
       }
 
-      if (_specificScreenNames?.trim().isNotEmpty ?? false) {
+      if (specificScreenNames.isNotEmpty) {
         List<UserWithExtra> users = [];
 
-        if (TwitterAccount.hasAccountAvailable()) {
-          users = await Twitter.getUsersByScreenName(
-              _specificScreenNames!.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty));
-        } else {
-          for (String screenName in _specificScreenNames!.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty)) {
+        try {
+          users = await Twitter.getUsersByScreenName(specificScreenNames);
+        } catch (_) {
+          // Fallback to one-by-one lookup. This handles lookup endpoint instability.
+          for (String screenName in specificScreenNames) {
             try {
               users.add((await Twitter.getProfileByScreenName(screenName)).user);
             } catch (err, stk) {
@@ -116,7 +160,8 @@ class _SubscriptionImportScreenState extends State<SubscriptionImportScreen> {
             ]
           });
 
-          _streamController?.add(users.length);
+          total += users.length;
+          _streamController?.add(total);
         }
       }
 
@@ -160,7 +205,7 @@ class _SubscriptionImportScreenState extends State<SubscriptionImportScreen> {
                     labelText: L10n.of(context).username,
                   ),
                   maxLength: 15,
-                  inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^[a-zA-Z0-9_]+'))],
+                  inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9_@]'))],
                   onChanged: (value) {
                     setState(() {
                       _fromScreenName = value;
@@ -184,7 +229,7 @@ class _SubscriptionImportScreenState extends State<SubscriptionImportScreen> {
                     labelText: L10n.of(context).usernames,
                   ),
                   maxLength: 100,
-                  inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^[a-zA-Z0-9_,]+'))],
+                  inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9_,@\s]'))],
                   onChanged: (value) {
                     setState(() {
                       _specificScreenNames = value;

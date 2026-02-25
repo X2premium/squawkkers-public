@@ -296,11 +296,12 @@ class Twitter {
   }
 
   static Future<Follows> getProfileFollows(String screenName, String type, {int? cursor, int? count = 200}) async {
+    var useAuthenticated = TwitterAccount.hasAccountAvailable();
+    var service = useAuthenticated ? _twitterApi.userService : _twitterApiAllowUnauthenticated.userService;
+
     var response = type == 'following'
-        ? await _twitterApiAllowUnauthenticated.userService
-            .friendsList(screenName: screenName, cursor: cursor, count: count, skipStatus: true)
-        : await _twitterApiAllowUnauthenticated.userService
-            .followersList(screenName: screenName, cursor: cursor, count: count, skipStatus: true);
+        ? await service.friendsList(screenName: screenName, cursor: cursor, count: count, skipStatus: true)
+        : await service.followersList(screenName: screenName, cursor: cursor, count: count, skipStatus: true);
 
     return Follows(
         cursorBottom: int.parse(response.nextCursorStr ?? '-1'),
@@ -1047,6 +1048,9 @@ class Twitter {
     }
 
     var result = json.decode(response.body);
+    if (result is! List) {
+      return [];
+    }
 
     return List.from(result).map((e) => UserWithExtra.fromJson(e)).toList(growable: false);
   }
@@ -1057,7 +1061,14 @@ class Twitter {
       'screen_name': screenNames.join(','),
     }));
 
+    if (response.body.isEmpty) {
+      return [];
+    }
+
     var result = json.decode(response.body);
+    if (result is! List) {
+      return [];
+    }
 
     return List.from(result).map((e) => UserWithExtra.fromJson(e)).toList(growable: false);
   }

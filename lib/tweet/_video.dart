@@ -42,15 +42,21 @@ class TweetVideoMetadata {
     var streamUrl = variants[0].url!;
     var imageUrl = media.mediaUrlHttps;
 
-    // Find the MP4 video with the lowest or highest bitrate depending of the option
-    var downloadUrl = variants
-        .where((e) => e.bitrate != null)
+    // Find the MP4 video variant. Prefer bitrate-ranked variants, then fallback to any MP4 URL.
+    var mp4Variants = variants
         .where((e) => e.url != null)
         .where((e) => e.contentType == 'video/mp4')
-        .sorted(
-            (a, b) => downloadBestVideoQuality ? b.bitrate!.compareTo(a.bitrate!) : a.bitrate!.compareTo(b.bitrate!))
-        .map((e) => e.url)
-        .firstWhereOrNull((e) => e != null);
+        .toList(growable: false);
+
+    var rankedMp4Variants = mp4Variants
+        .where((e) => e.bitrate != null)
+        .sorted((a, b) => downloadBestVideoQuality
+            ? b.bitrate!.compareTo(a.bitrate!)
+            : a.bitrate!.compareTo(b.bitrate!))
+        .toList(growable: false);
+
+    var downloadUrl = rankedMp4Variants.map((e) => e.url).firstWhereOrNull((e) => e != null) ??
+        mp4Variants.map((e) => e.url).firstWhereOrNull((e) => e != null);
 
     return TweetVideoMetadata(
         durationMillis, aspectRatio, imageUrl, () async => TweetVideoUrls(streamUrl, downloadUrl));

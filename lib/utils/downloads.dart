@@ -21,10 +21,6 @@ Future<void> downloadUriToPickedFile(BuildContext context, Uri uri, String fileN
     onStart();
     Future<Uint8List?> responseTask = downloadFile(context, uri);
 
-    DeviceInfoPlugin plugin = DeviceInfoPlugin();
-    AndroidDeviceInfo android = await plugin.androidInfo;
-    var storagePermission = android.version.sdkInt < 30 ? await Permission.storage.request() : await Permission.manageExternalStorage.request();
-
     var response = await responseTask;
     if (response == null) {
       return;
@@ -45,25 +41,35 @@ Future<void> downloadUriToPickedFile(BuildContext context, Uri uri, String fileN
       return;
     }
 
+    PermissionStatus storagePermission = PermissionStatus.granted;
+    if (Platform.isAndroid) {
+      DeviceInfoPlugin plugin = DeviceInfoPlugin();
+      AndroidDeviceInfo android = await plugin.androidInfo;
+      storagePermission = android.version.sdkInt < 30
+          ? await Permission.storage.request()
+          : await Permission.manageExternalStorage.request();
+    }
+
     // Otherwise, check we have the storage permission
     if (!storagePermission.isGranted) {
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(L10n.current.permission_not_granted),
-          action: SnackBarAction(
-            label: L10n.current.open_app_settings,
-            onPressed: openAppSettings,
-          ),
-        ),
-      );
+      // If directory writing permission isn't granted, fall back to manual save dialog.
+      var fileInfo =
+          await FlutterFileDialog.saveFile(params: SaveFileDialogParams(fileName: sanitizedFilename, data: response));
+      if (fileInfo != null) {
+        onSuccess();
+        return;
+      }
 
-      await openAppSettings();
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(L10n.current.permission_not_granted),
+      ));
       return;
     }
 
     // Finally, save to the user-defined directory
     var savedFile = p.join(downloadPath, sanitizedFilename);
+    await Directory(downloadPath).create(recursive: true);
     await File(savedFile).writeAsBytes(response);
     if (Platform.isAndroid) {
       MediaScanner.loadMedia(path: savedFile);
@@ -88,6 +94,15 @@ class UnableToSaveMedia {
 
 Future<Uint8List?> downloadFile(BuildContext context, Uri uri) async {
   var response = await AppHttpClient.httpGet(uri);
+  if (response.statusCode != 200) {
+    response = await AppHttpClient.httpGet(uri, headers: {
+      'User-Agent': 'Mozilla/5.0',
+      'Referer': 'https://x.com/',
+      'Origin': 'https://x.com',
+      'Accept': '*/*',
+    });
+  }
+
   if (response.statusCode == 200) {
     return response.bodyBytes;
   }

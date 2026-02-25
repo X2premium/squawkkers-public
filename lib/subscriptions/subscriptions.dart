@@ -24,7 +24,17 @@ class SubscriptionsScreen extends StatelessWidget {
           IconButton(
             icon: const Icon(Symbols.refresh_rounded),
             onPressed: () async {
-              await context.read<SubscriptionsModel>().refreshSubscriptionData();
+              try {
+                await context.read<SubscriptionsModel>().refreshSubscriptionData();
+              } catch (e) {
+                if (!context.mounted) {
+                  return;
+                }
+                ScaffoldMessenger.of(context).clearSnackBars();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('$e')),
+                );
+              }
             },
           ),
           PopupMenuButton<String>(
