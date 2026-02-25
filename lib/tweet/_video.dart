@@ -144,13 +144,13 @@ class _TweetVideoState extends State<TweetVideo> with AutomaticKeepAliveClientMi
         subtitlesButtonText: L10n.of(context).subtitles,
         cancelButtonText: L10n.of(context).cancel,
       ),
-      additionalOptions: (context) => [
+      additionalOptions: (sheetContext) => [
         OptionItem(
           onTap: (context) async {
             var video = downloadUrl;
             if (video == null) {
-              ScaffoldMessenger.of(context).clearSnackBars();
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              ScaffoldMessenger.of(this.context).clearSnackBars();
+              ScaffoldMessenger.of(this.context).showSnackBar(SnackBar(
                 content: Text(L10n.current.download_media_no_url),
               ));
               return;
@@ -159,22 +159,26 @@ class _TweetVideoState extends State<TweetVideo> with AutomaticKeepAliveClientMi
             var videoUri = Uri.parse(video);
             var fileName = '${widget.username}-${path.basename(videoUri.path)}';
 
-            Navigator.pop(context);
+            Navigator.pop(sheetContext);
+
+            if (!mounted) {
+              return;
+            }
 
             await downloadUriToPickedFile(
-              context,
+              this.context,
               videoUri,
               fileName,
               onStart: () {
-                ScaffoldMessenger.of(context).clearSnackBars();
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text(L10n.of(context).downloading_media),
+                ScaffoldMessenger.of(this.context).clearSnackBars();
+                ScaffoldMessenger.of(this.context).showSnackBar(SnackBar(
+                  content: Text(L10n.of(this.context).downloading_media),
                 ));
               },
               onSuccess: () {
-                ScaffoldMessenger.of(context).clearSnackBars();
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text(L10n.of(context).successfully_saved_the_media),
+                ScaffoldMessenger.of(this.context).clearSnackBars();
+                ScaffoldMessenger.of(this.context).showSnackBar(SnackBar(
+                  content: Text(L10n.of(this.context).successfully_saved_the_media),
                 ));
               },
             );
