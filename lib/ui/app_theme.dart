@@ -30,7 +30,7 @@ class AppTheme {
         space: 24,
         thickness: 1,
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: cardColor,
         elevation: 0,
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -107,7 +107,7 @@ class AppTheme {
           borderRadius: BorderRadius.vertical(top: Radius.circular(_radius)),
         ),
       ),
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         backgroundColor: scheme.surface,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(_radius)),
