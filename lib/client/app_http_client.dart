@@ -40,7 +40,6 @@ class AppHttpClient {
     else {
       throw Exception('Uri scheme ${uri.scheme} not implemented.');
     }
-    httpClient.badCertificateCallback = (X509Certificate cert, String host, int port) => true;
     _ioClient = IOClient(httpClient);
   }
 

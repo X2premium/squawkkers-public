@@ -56,7 +56,7 @@ Future checkForUpdates() async {
   final client = HttpClient();
   client.userAgent = faker.internet.userAgent();
 
-  final request = await client.getUrl(Uri.parse("https://api.github.com/repos/j-fbriere/squawker/releases/latest"));
+  final request = await client.getUrl(Uri.parse("https://api.github.com/repos/X2premium/squawkkers/releases/latest"));
   final response = await request.close();
 
   if (response.statusCode == 200) {
@@ -325,6 +325,7 @@ class _SquawkerAppState extends State<SquawkerApp> with WidgetsBindingObserver {
   Locale? _locale;
   final _MyRouteObserver _routeObserver = _MyRouteObserver();
   bool _accountDialogShown = false;
+  bool _prefListenersInitialized = false;
 
   @override
   void didChangeDependencies() {
@@ -377,40 +378,44 @@ class _SquawkerAppState extends State<SquawkerApp> with WidgetsBindingObserver {
       setDisableScreenshots(prefService.get(optionDisableScreenshots));
     });
 
-    prefService.addKeyListener(optionShouldCheckForUpdates, () {
-      setState(() {});
-    });
+    if (!_prefListenersInitialized) {
+      _prefListenersInitialized = true;
 
-    prefService.addKeyListener(optionLocale, () {
-      setState(() {
-        setLocale(prefService.get<String>(optionLocale));
+      prefService.addKeyListener(optionShouldCheckForUpdates, () {
+        setState(() {});
       });
-    });
 
-    // Whenever the "true black" preference is toggled, apply the toggle
-    prefService.addKeyListener(optionThemeTrueBlack, () {
-      setState(() {
-        _trueBlack = prefService.get(optionThemeTrueBlack);
+      prefService.addKeyListener(optionLocale, () {
+        setState(() {
+          setLocale(prefService.get<String>(optionLocale));
+        });
       });
-    });
 
-    prefService.addKeyListener(optionThemeMode, () {
-      setState(() {
-        _themeMode = prefService.get(optionThemeMode);
+      // Whenever the "true black" preference is toggled, apply the toggle
+      prefService.addKeyListener(optionThemeTrueBlack, () {
+        setState(() {
+          _trueBlack = prefService.get(optionThemeTrueBlack);
+        });
       });
-    });
 
-    prefService.addKeyListener(optionThemeColorScheme, () {
-      setState(() {
-        setColorScheme(prefService.get(optionThemeColorScheme));
+      prefService.addKeyListener(optionThemeMode, () {
+        setState(() {
+          _themeMode = prefService.get(optionThemeMode);
+        });
       });
-    });
 
-    prefService.addKeyListener(optionDisableScreenshots, () {
-      setState(() {
-        setDisableScreenshots(prefService.get(optionDisableScreenshots));
+      prefService.addKeyListener(optionThemeColorScheme, () {
+        setState(() {
+          setColorScheme(prefService.get(optionThemeColorScheme));
+        });
       });
-    });
+
+      prefService.addKeyListener(optionDisableScreenshots, () {
+        setState(() {
+          setDisableScreenshots(prefService.get(optionDisableScreenshots));
+        });
+      });
+    }
   }
 
   @override
