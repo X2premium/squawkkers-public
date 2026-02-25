@@ -105,6 +105,7 @@ class TweetTileState extends State<TweetTile> with SingleTickerProviderStateMixi
 
   static List<TweetEntity> _getEntities(BuildContext context, TweetWithCard tweet) {
     List<TweetEntity> entities = [];
+    final linkColor = Theme.of(context).colorScheme.primary;
 
     entities = _populateEntities(
         entities: entities,
@@ -112,7 +113,8 @@ class TweetTileState extends State<TweetTile> with SingleTickerProviderStateMixi
         getNewEntity: (Hashtag hashtag) {
           return TweetHashtag(
               hashtag,
-              () => pushNamedRoute(context, routeSearch, SearchArguments(1, focusInputOnOpen: false, query: '#${hashtag.text}')));
+              () => pushNamedRoute(context, routeSearch, SearchArguments(1, focusInputOnOpen: false, query: '#${hashtag.text}')),
+              linkColor);
         });
 
     entities = _populateEntities(
@@ -121,7 +123,7 @@ class TweetTileState extends State<TweetTile> with SingleTickerProviderStateMixi
         getNewEntity: (UserMention mention) {
           return TweetUserMention(mention, () {
             pushNamedRoute(context, routeProfile, ProfileScreenArguments(mention.idStr, mention.screenName));
-          });
+          }, linkColor);
         });
 
     entities = _populateEntities(
@@ -137,7 +139,7 @@ class TweetTileState extends State<TweetTile> with SingleTickerProviderStateMixi
             }
 
             await openUri(uri);
-          });
+          }, linkColor);
         });
 
     entities.sort((a, b) => a.getEntityStart().compareTo(b.getEntityStart()));
@@ -428,7 +430,7 @@ class TweetTileState extends State<TweetTile> with SingleTickerProviderStateMixi
         ],
       );
 
-      retweetSidebar = Container(color: theme.secondaryHeaderColor, width: 4);
+      retweetSidebar = Container(color: theme.colorScheme.primaryContainer.withOpacity(0.6), width: 4);
     }
 
     Widget replyToTile = Container();
@@ -509,7 +511,7 @@ class TweetTileState extends State<TweetTile> with SingleTickerProviderStateMixi
     var birdwatchQuoted = Container();
     if (tweet.birdwatchQuotedStatus != null) {
       birdwatchQuoted = Container(
-        decoration: BoxDecoration(border: Border.all(color: theme.primaryColor), borderRadius: BorderRadius.circular(8)),
+        decoration: BoxDecoration(border: Border.all(color: theme.colorScheme.outlineVariant), borderRadius: BorderRadius.circular(12)),
         margin: const EdgeInsets.all(8),
         child: TweetTile(
           clickable: false,
@@ -525,7 +527,7 @@ class TweetTileState extends State<TweetTile> with SingleTickerProviderStateMixi
       if (tweet.quotedStatusWithCard != null) {
         quotedTweet = Container(
           decoration:
-              BoxDecoration(border: Border.all(color: theme.primaryColor), borderRadius: BorderRadius.circular(8)),
+              BoxDecoration(border: Border.all(color: theme.colorScheme.outlineVariant), borderRadius: BorderRadius.circular(12)),
           margin: const EdgeInsets.all(8),
           child: TweetTile(
             clickable: true,
@@ -565,8 +567,8 @@ class TweetTileState extends State<TweetTile> with SingleTickerProviderStateMixi
     Widget translateButton;
     switch (_translationStatus) {
       case TranslationStatus.original:
-        translateButton =
-            _createFooterIconButton(Symbols.translate_rounded, Colors.blue, null, () async => onClickTranslate());
+        translateButton = _createFooterIconButton(
+            Symbols.translate_rounded, theme.colorScheme.primary, null, () async => onClickTranslate());
         break;
       case TranslationStatus.translating:
         translateButton = const Padding(
@@ -575,12 +577,12 @@ class TweetTileState extends State<TweetTile> with SingleTickerProviderStateMixi
         );
         break;
       case TranslationStatus.translationFailed:
-        translateButton =
-            _createFooterIconButton(Symbols.translate_rounded, Colors.red, null, () async => onClickTranslate());
+        translateButton = _createFooterIconButton(
+            Symbols.translate_rounded, theme.colorScheme.error, null, () async => onClickTranslate());
         break;
       case TranslationStatus.translated:
-        translateButton =
-            _createFooterIconButton(Symbols.translate_rounded, Colors.green, null, () async => onClickShowOriginal());
+        translateButton = _createFooterIconButton(
+            Symbols.translate_rounded, theme.colorScheme.tertiary, null, () async => onClickShowOriginal());
         break;
     }
 
@@ -651,7 +653,7 @@ class TweetTileState extends State<TweetTile> with SingleTickerProviderStateMixi
                                           style: const TextStyle(fontWeight: FontWeight.w500))),
                                   if (tweet.user!.verified ?? false) const SizedBox(width: 4),
                                   if (tweet.user!.verified ?? false)
-                                    Icon(Symbols.verified, size: 18, color: Theme.of(context).primaryColor)
+                                    Icon(Symbols.verified, size: 18, color: Theme.of(context).colorScheme.primary)
                                 ],
                               ),
                             ),
@@ -823,7 +825,7 @@ class _TweetTileLeading extends StatelessWidget {
           child: RichText(
             text: TextSpan(children: [
               WidgetSpan(
-                  child: Icon(icon, size: 12, color: Theme.of(context).hintColor),
+                  child: Icon(icon, size: 12, color: Theme.of(context).colorScheme.onSurfaceVariant),
                   alignment: PlaceholderAlignment.middle),
               const WidgetSpan(child: SizedBox(width: 16)),
               ...children

@@ -102,12 +102,17 @@ class _SearchScreenState extends State<_SearchScreen> with SingleTickerProviderS
 
     var defaultTheme = Theme.of(context);
     var searchTheme = defaultTheme.copyWith(
-      appBarTheme: AppBarTheme(
-        backgroundColor: defaultTheme.colorScheme.brightness == Brightness.dark ? Colors.grey[900] : Colors.white,
-        iconTheme: defaultTheme.primaryIconTheme.copyWith(color: Colors.grey),
+      appBarTheme: defaultTheme.appBarTheme.copyWith(
+        backgroundColor: defaultTheme.colorScheme.surface.withOpacity(0.92),
+        surfaceTintColor: Colors.transparent,
+        foregroundColor: defaultTheme.colorScheme.onSurface,
+        iconTheme: IconThemeData(color: defaultTheme.colorScheme.onSurfaceVariant),
       ),
-      inputDecorationTheme: const InputDecorationTheme(
-        border: InputBorder.none,
+      inputDecorationTheme: defaultTheme.inputDecorationTheme.copyWith(
+        hintStyle: defaultTheme.textTheme.bodyMedium?.copyWith(
+          color: defaultTheme.colorScheme.onSurfaceVariant,
+        ),
+        fillColor: defaultTheme.colorScheme.surfaceContainerHighest.withOpacity(0.8),
       ),
     );
 
@@ -120,8 +125,12 @@ class _SearchScreenState extends State<_SearchScreen> with SingleTickerProviderS
           title: TextField(
             controller: _queryController,
             focusNode: _focusNode,
-            style: searchTheme.textTheme.titleLarge,
+            style: searchTheme.textTheme.titleMedium,
             textInputAction: TextInputAction.search,
+            decoration: InputDecoration(
+              hintText: L10n.of(context).search,
+              prefixIcon: const Icon(Symbols.search),
+            ),
             onChanged: (String text) {
               _resetQuery();
             },
@@ -173,7 +182,9 @@ class _SearchScreenState extends State<_SearchScreen> with SingleTickerProviderS
                   Tab(icon: Icon(Symbols.trending_up)),
                 ],
                 labelColor: Theme.of(context).appBarTheme.foregroundColor,
-                indicatorColor: Theme.of(context).appBarTheme.foregroundColor,
+                indicatorColor: Theme.of(context).colorScheme.primary,
+                indicatorSize: TabBarIndicatorSize.label,
+                dividerColor: Theme.of(context).dividerColor.withOpacity(0.5),
               ),
             ),
             MultiProvider(
@@ -374,4 +385,3 @@ class TweetSearchResultListState<S extends Store<SearchStatus<T>>, T> extends St
     );
   }
 }
-

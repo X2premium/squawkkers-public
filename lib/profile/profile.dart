@@ -257,7 +257,7 @@ class _ProfileScreenBodyState extends State<ProfileScreenBody> with TickerProvid
 
     var banner = user.profileBannerUrl;
     var bannerImage = banner == null
-        ? Container(height: bannerHeight, color: Colors.white)
+        ? Container(height: bannerHeight, color: theme.colorScheme.surfaceContainerHighest)
         : ExtendedImage.network(banner, fit: BoxFit.fitWidth, height: bannerHeight);
 
     // The height of the app bar should be all the inner components, plus any margins
@@ -537,7 +537,7 @@ class _ProfileScreenBodyState extends State<ProfileScreenBody> with TickerProvid
                         margin: EdgeInsets.fromLTRB(16, profileImageTop, 16, 16),
                         child: CircleAvatar(
                           radius: 50,
-                          backgroundColor: Colors.white,
+                          backgroundColor: theme.colorScheme.surface,
                           child: GestureDetector(
                               child: UserAvatar(uri: user.profileImageUrlHttps, size: 96),
                               onTap: () => Navigator.push(

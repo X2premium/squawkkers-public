@@ -21,14 +21,15 @@ abstract class TweetEntity {
 class TweetHashtag extends TweetEntity {
   final Hashtag hashtag;
   final Function onTap;
+  final Color color;
 
-  TweetHashtag(this.hashtag, this.onTap) : super(hashtag.indices);
+  TweetHashtag(this.hashtag, this.onTap, this.color) : super(hashtag.indices);
 
   @override
   InlineSpan getContent() {
     return TextSpan(
         text: '#${hashtag.text}',
-        style: const TextStyle(color: Colors.blue),
+        style: TextStyle(color: color, fontWeight: FontWeight.w600),
         recognizer: TapGestureRecognizer()
           ..onTap = () {
             onTap();
@@ -39,14 +40,15 @@ class TweetHashtag extends TweetEntity {
 class TweetUserMention extends TweetEntity {
   final UserMention mention;
   final Function onTap;
+  final Color color;
 
-  TweetUserMention(this.mention, this.onTap) : super(mention.indices);
+  TweetUserMention(this.mention, this.onTap, this.color) : super(mention.indices);
 
   @override
   InlineSpan getContent() {
     return TextSpan(
         text: '@${mention.screenName}',
-        style: const TextStyle(color: Colors.blue),
+        style: TextStyle(color: color, fontWeight: FontWeight.w600),
         recognizer: TapGestureRecognizer()
           ..onTap = () {
             onTap();
@@ -57,14 +59,15 @@ class TweetUserMention extends TweetEntity {
 class TweetUrl extends TweetEntity {
   final Url url;
   final Function onTap;
+  final Color color;
 
-  TweetUrl(this.url, this.onTap) : super(url.indices);
+  TweetUrl(this.url, this.onTap, this.color) : super(url.indices);
 
   @override
   InlineSpan getContent() {
     return TextSpan(
         text: url.displayUrl,
-        style: const TextStyle(color: Colors.blue),
+        style: TextStyle(color: color, fontWeight: FontWeight.w600),
         recognizer: TapGestureRecognizer()
           ..onTap = () {
             onTap();

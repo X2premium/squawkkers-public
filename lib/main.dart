@@ -39,6 +39,7 @@ import 'package:squawker/subscriptions/users_model.dart';
 import 'package:squawker/trends/trends_model.dart';
 import 'package:squawker/tweet/_video.dart';
 import 'package:squawker/ui/errors.dart';
+import 'package:squawker/ui/app_theme.dart';
 import 'package:squawker/utils/accent_util.dart';
 import 'package:squawker/utils/data_service.dart';
 import 'package:squawker/utils/iterables.dart';
@@ -432,7 +433,7 @@ class _SquawkerAppState extends State<SquawkerApp> with WidgetsBindingObserver {
         break;
     }
 
-    ThemeData light = FlexThemeData.light(
+    ThemeData lightBase = FlexThemeData.light(
       colors: _accentColor ? AccentUtil.lightAccentColors : null,
       scheme: _colorScheme,
       surfaceMode: FlexSurfaceMode.highScaffoldLowSurface,
@@ -448,7 +449,7 @@ class _SquawkerAppState extends State<SquawkerApp> with WidgetsBindingObserver {
       useMaterial3: true,
       appBarStyle: FlexAppBarStyle.primary,
     );
-    ThemeData dark = FlexThemeData.dark(
+    ThemeData darkBase = FlexThemeData.dark(
       colors: _accentColor ? AccentUtil.darkAccentColors : null,
       scheme: _colorScheme,
       darkIsTrueBlack: _trueBlack,
@@ -465,6 +466,8 @@ class _SquawkerAppState extends State<SquawkerApp> with WidgetsBindingObserver {
       useMaterial3: true,
       appBarStyle: _trueBlack ? FlexAppBarStyle.surface : FlexAppBarStyle.primary,
     );
+    ThemeData light = AppTheme.applyBase(lightBase, trueBlack: _trueBlack);
+    ThemeData dark = AppTheme.applyBase(darkBase, trueBlack: _trueBlack);
     return MaterialApp(
       navigatorKey: _navigatorKey,
       localeListResolutionCallback: (locales, supportedLocales) {
@@ -608,7 +611,12 @@ class _SquawkerAppState extends State<SquawkerApp> with WidgetsBindingObserver {
               prefix: L10n.of(context).something_broke_in_fritter,
             );
 
-        return child ?? Container(); //DevicePreview.appBuilder(context, child ?? Container());
+        final prefs = PrefService.of(context);
+        return AppTheme.background(
+          context: context,
+          trueBlack: prefs.get(optionThemeTrueBlack),
+          child: child ?? Container(),
+        ); //DevicePreview.appBuilder(context, child ?? Container());
       },
     );
   }

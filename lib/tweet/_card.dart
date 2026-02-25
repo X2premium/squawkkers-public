@@ -24,20 +24,22 @@ class TweetCard extends StatelessWidget {
 
   const TweetCard({Key? key, required this.tweet, required this.card}) : super(key: key);
 
-  _createBaseCard(Widget child) {
+  _createBaseCard(BuildContext context, Widget child) {
+    final theme = Theme.of(context);
     return Container(
         margin: const EdgeInsets.symmetric(horizontal: 12),
         width: double.infinity,
         child: Card(
           clipBehavior: Clip.antiAlias,
-          color: Colors.blue,
+          color: theme.colorScheme.surface,
+          surfaceTintColor: Colors.transparent,
           child: child,
         ));
   }
 
-  _createCard(String? url, Widget child) {
+  _createCard(BuildContext context, String? url, Widget child) {
     return GestureDetector(
-      child: _createBaseCard(child),
+      child: _createBaseCard(context, child),
       onTap: () => url == null ? null : openUri(url),
     );
   }
@@ -66,6 +68,7 @@ class TweetCard extends StatelessWidget {
   }
 
   _createListTile(BuildContext context, String title, String? description, String? uri) {
+    final scheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.only(left: 12, right: 12, bottom: 4),
       child: Column(
@@ -77,10 +80,11 @@ class TweetCard extends StatelessWidget {
               title,
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
-              style: Theme.of(context)
-                  .textTheme
-                  .titleMedium!
-                  .copyWith(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500),
+              style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                    color: scheme.onSurface,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
             ),
           ),
           if (description != null)
@@ -90,7 +94,10 @@ class TweetCard extends StatelessWidget {
                 description,
                 overflow: TextOverflow.ellipsis,
                 maxLines: 2,
-                style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: Colors.white, fontSize: 12),
+                style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                      color: scheme.onSurfaceVariant,
+                      fontSize: 12,
+                    ),
               ),
             ),
           if (uri != null)
@@ -99,12 +106,10 @@ class TweetCard extends StatelessWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const Icon(Symbols.link_rounded, size: 12, color: Colors.white),
+                  Icon(Symbols.link_rounded, size: 12, color: scheme.primary),
                   const SizedBox(width: 4),
                   Text(uri,
-                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                            color: Colors.white,
-                          )),
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(color: scheme.primary)),
                 ],
               ),
             )
@@ -118,7 +123,7 @@ class TweetCard extends StatelessWidget {
     var choicePercent = total == 0 ? 0 : (100 / total) * choiceCount;
 
     var theme = Theme.of(context);
-    var textColor = theme.brightness == Brightness.light ? Colors.black : Colors.white;
+    var textColor = theme.colorScheme.onSurface;
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 4),
@@ -127,8 +132,8 @@ class TweetCard extends StatelessWidget {
           height: 24,
           child: LinearProgressIndicator(
               value: choicePercent / 100,
-              color:
-                  theme.brightness == Brightness.light ? Colors.blue.withOpacity(0.3) : Colors.blue.withOpacity(0.7)),
+              color: theme.colorScheme.primary.withOpacity(0.5),
+              backgroundColor: theme.colorScheme.surfaceContainerHighest),
         ),
         Container(
             alignment: Alignment.centerLeft,
@@ -152,6 +157,7 @@ class TweetCard extends StatelessWidget {
   _createWebsiteCard(
       BuildContext context, Map<String, dynamic> unifiedCard, String uri, String imageSize, Widget media) {
     return _createCard(
+        context,
         uri,
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -273,6 +279,7 @@ class TweetCard extends StatelessWidget {
         var image = card['binding_values']['thumbnail_image$imageKey']?['image_value'];
 
         return _createCard(
+            context,
             _findCardUrl(card),
             Row(
               children: [
@@ -290,6 +297,7 @@ class TweetCard extends StatelessWidget {
         var image = card['binding_values']['thumbnail_image$imageKey']?['image_value'];
 
         return _createCard(
+            context,
             _findCardUrl(card),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -310,6 +318,7 @@ class TweetCard extends StatelessWidget {
         var image = card['binding_values']['player_image$imageKey']?['image_value'];
 
         return _createCard(
+            context,
             _findCardUrl(card),
             Row(
               children: [
@@ -337,6 +346,7 @@ class TweetCard extends StatelessWidget {
         var vanityUrl = card['binding_values']['vanity_url']['string_value'];
 
         return _createCard(
+            context,
             url,
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -366,6 +376,7 @@ class TweetCard extends StatelessWidget {
 
         // TODO: This opens the URL externally. Create a screen for it in Squawker
         return _createCard(
+            context,
             url,
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -413,6 +424,7 @@ class TweetCard extends StatelessWidget {
 
         // TODO: This opens the URL externally. Create a screen for it in Squawker
         return _createCard(
+            context,
             uri,
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,

@@ -43,15 +43,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     var appVersion = 'v${_packageInfo.version}+${_packageInfo.buildNumber}';
     bool navigationAnimationsEnabled = PrefService.of(context).get(optionNavigationAnimations);
+    Widget settingsTile({required String title, required IconData icon, required VoidCallback onTap}) {
+      return Card(
+        child: ListTile(
+          title: Text(title),
+          leading: Icon(icon),
+          trailing: const Icon(Symbols.chevron_right_rounded),
+          onTap: onTap,
+        ),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(title: Text(L10n.of(context).settings)),
       body: ListView(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         children: [
-          ListTile(
-            title: Text(L10n.of(context).general),
-            leading: Icon(Symbols.settings),
+          settingsTile(
+            title: L10n.of(context).general,
+            icon: Symbols.settings,
             onTap: () => Navigator.push(
               context,
               navigationAnimationsEnabled
@@ -59,9 +69,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 : PageRouteBuilder(pageBuilder: (context, anim1, anim2) => const SettingsGeneralFragment()),
             ),
           ),
-          ListTile(
-            title: Text(L10n.of(context).account),
-            leading: Icon(Symbols.account_circle_rounded),
+          settingsTile(
+            title: L10n.of(context).account,
+            icon: Symbols.account_circle_rounded,
             onTap: () => Navigator.push(
               context,
               navigationAnimationsEnabled
@@ -69,9 +79,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 : PageRouteBuilder(pageBuilder: (context, anim1, anim2) => const SettingsAccountFragment()),
             ),
           ),
-          ListTile(
-            title: Text(L10n.of(context).home),
-            leading: Icon(Symbols.home),
+          settingsTile(
+            title: L10n.of(context).home,
+            icon: Symbols.home,
             onTap: () => Navigator.push(
               context,
               navigationAnimationsEnabled
@@ -79,9 +89,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 : PageRouteBuilder(pageBuilder: (context, anim1, anim2) => const SettingsHomeFragment()),
             ),
           ),
-          ListTile(
-            title: Text(L10n.of(context).theme),
-            leading: Icon(Symbols.palette),
+          settingsTile(
+            title: L10n.of(context).theme,
+            icon: Symbols.palette,
             onTap: () => Navigator.push(
               context,
               navigationAnimationsEnabled
@@ -89,9 +99,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 : PageRouteBuilder(pageBuilder: (context, anim1, anim2) => const SettingsThemeFragment()),
             ),
           ),
-          ListTile(
-            title: Text(L10n.of(context).data),
-            leading: Icon(Symbols.storage),
+          settingsTile(
+            title: L10n.of(context).data,
+            icon: Symbols.storage,
             onTap: () => Navigator.push(
               context,
               navigationAnimationsEnabled
@@ -99,9 +109,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 : PageRouteBuilder(pageBuilder: (context, anim1, anim2) => SettingsDataFragment(legacyExportPath: _legacyExportPath)),
             ),
           ),
-          ListTile(
-            title: Text(L10n.of(context).about),
-            leading: Icon(Symbols.info),
+          settingsTile(
+            title: L10n.of(context).about,
+            icon: Symbols.info,
             onTap: () => Navigator.push(
               context,
               navigationAnimationsEnabled
