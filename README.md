@@ -21,6 +21,12 @@
     <img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" height="80">
   </a>
 </p>
+
+## Download (Public Release)
+
+* Latest release page: https://github.com/X2premium/squawkkers-public/releases/latest
+* Latest universal APK: https://github.com/X2premium/squawkkers-public/releases/latest/download/squawkkers-universal.apk
+
 <p align="center">
   There is also an alternate F-Droid repository that allows updates for Squawker to be available faster than on the default F-Droid repository.
 </p>
