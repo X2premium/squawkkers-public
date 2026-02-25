@@ -1,4 +1,4 @@
-package org.ca.squawker;
+package com.x2premium.squawkkers;
 
 import android.content.Context;
 import android.content.Intent;

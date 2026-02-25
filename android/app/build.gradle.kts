@@ -36,7 +36,7 @@ if (!keystoreFile.isNullOrEmpty()) {
 }
 
 android {
-    namespace = "org.ca.squawker"
+    namespace = "com.x2premium.squawkkers"
     compileSdk = 36
     ndkVersion = flutter.ndkVersion
     
@@ -63,7 +63,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "org.ca.squawker"
+        applicationId = "com.x2premium.squawkkers"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
@@ -129,4 +129,3 @@ dependencies {
     implementation("androidx.multidex:multidex:2.0.1")
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
 }
-

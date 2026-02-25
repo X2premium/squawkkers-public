@@ -1,4 +1,4 @@
-package org.ca.squawker
+package com.x2premium.squawkkers
 
 import android.Manifest
 import android.app.Activity

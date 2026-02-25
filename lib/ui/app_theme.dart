@@ -1,4 +1,3 @@
-import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -6,7 +5,18 @@ class AppTheme {
   static const double _radius = 18;
 
   static ThemeData applyBase(ThemeData base, {required bool trueBlack}) {
-    final scheme = base.colorScheme;
+    var scheme = base.colorScheme;
+    if (base.brightness == Brightness.dark && trueBlack) {
+      scheme = scheme.copyWith(
+        surface: Colors.black,
+        background: Colors.black,
+        surfaceContainerLowest: const Color(0xFF0B0B0B),
+        surfaceContainerLow: const Color(0xFF101010),
+        surfaceContainer: const Color(0xFF141414),
+        surfaceContainerHigh: const Color(0xFF181818),
+        surfaceContainerHighest: const Color(0xFF1C1C1C),
+      );
+    }
     final textTheme = GoogleFonts.manropeTextTheme(base.textTheme).copyWith(
       displaySmall: GoogleFonts.manrope(fontSize: 36, fontWeight: FontWeight.w700, letterSpacing: -0.5),
       headlineSmall: GoogleFonts.manrope(fontSize: 24, fontWeight: FontWeight.w700, letterSpacing: -0.3),
@@ -17,14 +27,14 @@ class AppTheme {
       labelLarge: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.w600),
     );
 
-    final outline = scheme.outlineVariant.withOpacity(base.brightness == Brightness.dark ? 0.55 : 0.6);
-    final cardColor = scheme.surface;
+    final outline = scheme.outlineVariant.withOpacity(base.brightness == Brightness.dark ? 0.5 : 0.7);
+    final cardColor = scheme.surfaceContainerLow;
 
     return base.copyWith(
       textTheme: textTheme,
       primaryTextTheme: textTheme,
-      scaffoldBackgroundColor: Colors.transparent,
-      canvasColor: Colors.transparent,
+      scaffoldBackgroundColor: scheme.surface,
+      canvasColor: scheme.surface,
       dividerTheme: DividerThemeData(
         color: outline,
         space: 24,
@@ -48,7 +58,7 @@ class AppTheme {
       appBarTheme: AppBarTheme(
         elevation: 0,
         centerTitle: false,
-        backgroundColor: Colors.transparent,
+        backgroundColor: scheme.surface,
         surfaceTintColor: Colors.transparent,
         foregroundColor: scheme.onSurface,
         titleTextStyle: textTheme.titleLarge?.copyWith(color: scheme.onSurface),
@@ -69,7 +79,7 @@ class AppTheme {
             size: 22,
           ),
         ),
-        backgroundColor: scheme.surface.withOpacity(trueBlack ? 0.98 : 0.92),
+        backgroundColor: scheme.surfaceContainer,
         surfaceTintColor: Colors.transparent,
       ),
       chipTheme: base.chipTheme.copyWith(
@@ -79,7 +89,7 @@ class AppTheme {
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: scheme.surfaceContainerHighest.withOpacity(base.brightness == Brightness.dark ? 0.2 : 0.7),
+        fillColor: scheme.surfaceContainerHighest,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
@@ -142,35 +152,7 @@ class AppTheme {
       progressIndicatorTheme: ProgressIndicatorThemeData(
         color: scheme.primary,
       ),
-      visualDensity: FlexColorScheme.comfortablePlatformDensity,
       useMaterial3: true,
-    );
-  }
-
-  static BoxDecoration backgroundDecoration(ThemeData theme, {required bool trueBlack}) {
-    if (theme.brightness == Brightness.dark) {
-      return BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: trueBlack
-              ? const [Color(0xFF000000), Color(0xFF0B0C0E)]
-              : const [Color(0xFF0F1216), Color(0xFF131922)],
-        ),
-      );
-    }
-
-    return BoxDecoration(
-      gradient: LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [
-          const Color(0xFFF7F6F4),
-          theme.colorScheme.primary.withOpacity(0.06),
-          const Color(0xFFF0F3F6),
-        ],
-        stops: const [0.0, 0.5, 1.0],
-      ),
     );
   }
 
@@ -182,15 +164,9 @@ class AppTheme {
     if (child == null) {
       return const SizedBox.shrink();
     }
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: DecoratedBox(
-            decoration: backgroundDecoration(Theme.of(context), trueBlack: trueBlack),
-          ),
-        ),
-        child,
-      ],
+    return ColoredBox(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: child,
     );
   }
 }

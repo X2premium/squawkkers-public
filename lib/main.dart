@@ -531,14 +531,16 @@ class _SquawkerAppState extends State<SquawkerApp> with WidgetsBindingObserver {
       title: 'Squawker',
       theme: light.copyWith(
         tabBarTheme: light.tabBarTheme.copyWith(
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.grey.shade400.lighten(),
+          labelColor: light.colorScheme.onSurface,
+          unselectedLabelColor: light.colorScheme.onSurfaceVariant,
+          indicatorColor: light.colorScheme.primary,
         ),
       ),
       darkTheme: dark.copyWith(
         tabBarTheme: dark.tabBarTheme.copyWith(
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.grey.shade400.lighten(),
+          labelColor: dark.colorScheme.onSurface,
+          unselectedLabelColor: dark.colorScheme.onSurfaceVariant,
+          indicatorColor: dark.colorScheme.primary,
         ),
       ),
       themeMode: themeMode,

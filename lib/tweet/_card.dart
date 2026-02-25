@@ -31,7 +31,7 @@ class TweetCard extends StatelessWidget {
         width: double.infinity,
         child: Card(
           clipBehavior: Clip.antiAlias,
-          color: theme.colorScheme.surface,
+          color: theme.colorScheme.surfaceContainer,
           surfaceTintColor: Colors.transparent,
           child: child,
         ));
