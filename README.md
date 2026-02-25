@@ -35,6 +35,20 @@
  <sub>Important note: In case Squawker is already installed on your device and you want to reinstall it or want to install a version from another repository (from F-Droid to github or from F-Droid to the alternate F-Droid repository for instance), make sure to backup your application data (Settings/Data, tap Export, select all items then tap the save icon) and uninstall Squawker before proceeding.
   After you have reinstalled Squawker from the new repository, import your backup (Settings/Data, tap Import).</sub>
 </p>
+
+## This Fork: Fixes & Enhancements
+
+Compared to the original fork history, this repository includes:
+
+* Full Android UI refresh with a modern Material 3 design language (updated typography, spacing, cards, and surfaces)
+* Theme readability fixes across screens (removed remaining hardcoded white text and low-contrast UI states)
+* Improved tweet card and menu styling for consistent dark/light contrast
+* Video/media download reliability fixes (options-sheet context fix, HTTP fallback headers, and save dialog fallback when storage permission is denied)
+* Subscription import improvements (supports `@username`, profile URLs, and safer comma-separated parsing with lookup fallback)
+* Subscription refresh stability improvements (graceful handling when user lookup endpoints fail)
+* Swipe physics tuning to prevent non-stop/looping horizontal slide behavior
+* Android package migration to `com.x2premium.squawkkers` and updated launcher icon colors/assets
+* About screen and update-check links updated to this repository (`X2premium/squawkkers-public`)
  
 ## Features:
 
