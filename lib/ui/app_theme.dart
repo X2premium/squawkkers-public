@@ -26,13 +26,20 @@ class AppTheme {
       );
     }
     final textTheme = GoogleFonts.interTightTextTheme(base.textTheme).copyWith(
-      displaySmall: GoogleFonts.spaceGrotesk(fontSize: 36, fontWeight: FontWeight.w700, letterSpacing: -0.6),
-      headlineSmall: GoogleFonts.spaceGrotesk(fontSize: 24, fontWeight: FontWeight.w700, letterSpacing: -0.4),
-      titleLarge: GoogleFonts.spaceGrotesk(fontSize: 20, fontWeight: FontWeight.w600),
-      titleMedium: GoogleFonts.spaceGrotesk(fontSize: 16, fontWeight: FontWeight.w600),
-      bodyLarge: GoogleFonts.interTight(fontSize: 16, fontWeight: FontWeight.w400, height: 1.35),
-      bodyMedium: GoogleFonts.interTight(fontSize: 14, fontWeight: FontWeight.w400, height: 1.35),
-      labelLarge: GoogleFonts.spaceGrotesk(fontSize: 14, fontWeight: FontWeight.w600),
+      displaySmall: GoogleFonts.spaceGrotesk(
+          fontSize: 36, fontWeight: FontWeight.w700, letterSpacing: -0.6, color: scheme.onSurface),
+      headlineSmall: GoogleFonts.spaceGrotesk(
+          fontSize: 24, fontWeight: FontWeight.w700, letterSpacing: -0.4, color: scheme.onSurface),
+      titleLarge: GoogleFonts.spaceGrotesk(fontSize: 20, fontWeight: FontWeight.w600, color: scheme.onSurface),
+      titleMedium: GoogleFonts.spaceGrotesk(fontSize: 16, fontWeight: FontWeight.w600, color: scheme.onSurface),
+      bodyLarge: GoogleFonts.interTight(
+          fontSize: 16, fontWeight: FontWeight.w400, height: 1.35, color: scheme.onSurface),
+      bodyMedium: GoogleFonts.interTight(
+          fontSize: 14, fontWeight: FontWeight.w400, height: 1.35, color: scheme.onSurface),
+      bodySmall: GoogleFonts.interTight(
+          fontSize: 12, fontWeight: FontWeight.w400, height: 1.3, color: scheme.onSurfaceVariant),
+      labelLarge: GoogleFonts.spaceGrotesk(fontSize: 14, fontWeight: FontWeight.w600, color: scheme.onSurface),
+      labelMedium: GoogleFonts.spaceGrotesk(fontSize: 12, fontWeight: FontWeight.w600, color: scheme.onSurface),
     );
 
     final outline = scheme.outlineVariant.withOpacity(base.brightness == Brightness.dark ? 0.5 : 0.7);
@@ -64,7 +71,15 @@ class AppTheme {
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         iconColor: scheme.onSurfaceVariant,
+        textColor: scheme.onSurface,
+        titleTextStyle: textTheme.bodyLarge?.copyWith(color: scheme.onSurface),
+        subtitleTextStyle: textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
       ),
+      iconTheme: IconThemeData(color: scheme.onSurfaceVariant),
+      primaryIconTheme: IconThemeData(color: scheme.onSurfaceVariant),
+      hintColor: scheme.onSurfaceVariant,
+      disabledColor: scheme.onSurfaceVariant.withOpacity(0.6),
+      unselectedWidgetColor: scheme.onSurfaceVariant,
       appBarTheme: AppBarTheme(
         elevation: 0,
         centerTitle: false,
@@ -112,6 +127,20 @@ class AppTheme {
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide(color: scheme.primary, width: 1.2),
+        ),
+      ),
+      dropdownMenuTheme: DropdownMenuThemeData(
+        textStyle: textTheme.bodyMedium?.copyWith(color: scheme.onSurface),
+        menuStyle: MenuStyle(
+          backgroundColor: MaterialStatePropertyAll(scheme.surfaceContainerHigh),
+          surfaceTintColor: const MaterialStatePropertyAll(Colors.transparent),
+        ),
+      ),
+      menuTheme: MenuThemeData(
+        style: MenuStyle(
+          backgroundColor: MaterialStatePropertyAll(scheme.surfaceContainerHigh),
+          surfaceTintColor: const MaterialStatePropertyAll(Colors.transparent),
+          foregroundColor: MaterialStatePropertyAll(scheme.onSurface),
         ),
       ),
       snackBarTheme: SnackBarThemeData(
