@@ -62,11 +62,12 @@ class _SquawkerMaterialControlsState extends State<SquawkerMaterialControls>
   @override
   Widget build(BuildContext context) {
     if (_latestValue.hasError) {
+      final iconColor = Theme.of(context).colorScheme.onInverseSurface;
       return chewieController.errorBuilder?.call(
             context,
             chewieController.videoPlayerController.value.errorDescription!,
           ) ??
-          const Center(child: Icon(Symbols.error, color: Colors.white, size: 42));
+          Center(child: Icon(Symbols.error, color: iconColor, size: 42));
     }
 
     return MouseRegion(
@@ -189,6 +190,7 @@ class _SquawkerMaterialControlsState extends State<SquawkerMaterialControls>
   }
 
   Widget _buildOptionsButton() {
+    final iconColor = Theme.of(context).colorScheme.onInverseSurface;
     return AnimatedOpacity(
       opacity: notifier.hideStuff ? 0.0 : 1.0,
       duration: const Duration(milliseconds: 250),
@@ -218,7 +220,7 @@ class _SquawkerMaterialControlsState extends State<SquawkerMaterialControls>
             _startHideTimer();
           }
         },
-        icon: const Icon(Symbols.more_vert, color: Colors.white),
+        icon: Icon(Symbols.more_vert, color: iconColor),
       ),
     );
   }
@@ -257,7 +259,7 @@ class _SquawkerMaterialControlsState extends State<SquawkerMaterialControls>
   }
 
   AnimatedOpacity _buildBottomBar(BuildContext context) {
-    final iconColor = Theme.of(context).textTheme.labelLarge!.color;
+    final iconColor = Theme.of(context).colorScheme.onInverseSurface;
 
     return AnimatedOpacity(
       opacity: notifier.hideStuff ? 0.0 : 1.0,
@@ -308,6 +310,7 @@ class _SquawkerMaterialControlsState extends State<SquawkerMaterialControls>
   }
 
   GestureDetector _buildMuteButton(VideoPlayerController controller) {
+    final iconColor = Theme.of(context).colorScheme.onInverseSurface;
     return GestureDetector(
       onTap: () {
         _cancelAndRestartTimer();
@@ -328,7 +331,7 @@ class _SquawkerMaterialControlsState extends State<SquawkerMaterialControls>
             padding: const EdgeInsets.only(left: 6.0),
             child: Icon(
               _latestValue.volume > 0 ? Symbols.volume_up : Symbols.volume_off,
-              color: Colors.white,
+              color: iconColor,
             ),
           ),
         ),
@@ -337,6 +340,7 @@ class _SquawkerMaterialControlsState extends State<SquawkerMaterialControls>
   }
 
   GestureDetector _buildExpandButton() {
+    final iconColor = Theme.of(context).colorScheme.onInverseSurface;
     return GestureDetector(
       onTap: _onExpandCollapse,
       child: AnimatedOpacity(
@@ -351,7 +355,7 @@ class _SquawkerMaterialControlsState extends State<SquawkerMaterialControls>
               chewieController.isFullScreen
                   ? Symbols.fullscreen_exit
                   : Symbols.fullscreen,
-              color: Colors.white,
+              color: iconColor,
             ),
           ),
         ),
@@ -360,6 +364,7 @@ class _SquawkerMaterialControlsState extends State<SquawkerMaterialControls>
   }
 
   Widget _buildHitArea() {
+    final iconColor = Theme.of(context).colorScheme.onInverseSurface;
     final bool isFinished =
         (_latestValue.position >= _latestValue.duration) &&
         _latestValue.duration.inSeconds > 0;
@@ -400,7 +405,7 @@ class _SquawkerMaterialControlsState extends State<SquawkerMaterialControls>
               CenterSeekButton(
                 iconData: Icons.replay_10,
                 backgroundColor: Colors.black54,
-                iconColor: Colors.white,
+                iconColor: iconColor,
                 show: showPlayButton,
                 fadeDuration: chewieController.materialSeekButtonFadeDuration,
                 iconSize: chewieController.materialSeekButtonSize,
@@ -410,7 +415,7 @@ class _SquawkerMaterialControlsState extends State<SquawkerMaterialControls>
               margin: EdgeInsets.symmetric(horizontal: marginSize),
               child: CenterPlayButton(
                 backgroundColor: Colors.black54,
-                iconColor: Colors.white,
+                iconColor: iconColor,
                 isFinished: isFinished,
                 isPlaying: controller.value.isPlaying,
                 show: showPlayButton,
@@ -421,7 +426,7 @@ class _SquawkerMaterialControlsState extends State<SquawkerMaterialControls>
               CenterSeekButton(
                 iconData: Icons.forward_10,
                 backgroundColor: Colors.black54,
-                iconColor: Colors.white,
+                iconColor: iconColor,
                 show: showPlayButton,
                 fadeDuration: chewieController.materialSeekButtonFadeDuration,
                 iconSize: chewieController.materialSeekButtonSize,
@@ -456,6 +461,7 @@ class _SquawkerMaterialControlsState extends State<SquawkerMaterialControls>
   }
 
   Widget _buildPosition(Color? iconColor) {
+    final color = iconColor ?? Theme.of(context).colorScheme.onInverseSurface;
     final position = _latestValue.position;
     final duration = _latestValue.duration;
 
@@ -467,14 +473,14 @@ class _SquawkerMaterialControlsState extends State<SquawkerMaterialControls>
             text: '/ ${formatDuration(duration)}',
             style: TextStyle(
               fontSize: 14.0,
-              color: Colors.white.withValues(alpha: .75),
+              color: color.withValues(alpha: .75),
               fontWeight: FontWeight.normal,
             ),
           ),
         ],
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 14.0,
-          color: Colors.white,
+          color: color,
           fontWeight: FontWeight.bold,
         ),
       ),
@@ -482,6 +488,7 @@ class _SquawkerMaterialControlsState extends State<SquawkerMaterialControls>
   }
 
   Widget _buildSubtitleToggle() {
+    final iconColor = Theme.of(context).colorScheme.onInverseSurface;
     //if don't have subtitle hiden button
     if (chewieController.subtitle?.isEmpty ?? true) {
       return const SizedBox();
@@ -496,7 +503,7 @@ class _SquawkerMaterialControlsState extends State<SquawkerMaterialControls>
           _subtitleOn
               ? Symbols.closed_caption
               : Symbols.closed_caption_off,
-          color: _subtitleOn ? Colors.white : Colors.grey[700],
+          color: _subtitleOn ? iconColor : iconColor.withValues(alpha: .7),
         ),
       ),
     );
@@ -687,4 +694,3 @@ class _SquawkerMaterialControlsState extends State<SquawkerMaterialControls>
     );
   }
 }
-

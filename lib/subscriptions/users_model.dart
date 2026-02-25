@@ -5,6 +5,7 @@ import 'package:squawker/constants.dart';
 import 'package:squawker/database/entities.dart';
 import 'package:squawker/database/repository.dart';
 import 'package:squawker/group/group_model.dart';
+import 'package:squawker/user.dart';
 import 'package:squawker/utils/data_service.dart';
 import 'package:squawker/utils/iterables.dart';
 import 'package:logging/logging.dart';

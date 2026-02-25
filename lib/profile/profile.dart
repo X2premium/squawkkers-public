@@ -255,8 +255,8 @@ class _ProfileScreenBodyState extends State<ProfileScreenBody> with TickerProvid
 
     var theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final headerPrimaryColor = isDark ? Colors.white : theme.colorScheme.onSurface;
-    final headerSecondaryColor = isDark ? Colors.white70 : theme.colorScheme.onSurfaceVariant;
+    final headerPrimaryColor = theme.colorScheme.onSurface;
+    final headerSecondaryColor = theme.colorScheme.onSurfaceVariant;
     final headerGradientBottom = isDark ? const Color(0xDD000000) : const Color(0xDDEEF2F5);
     final headerGradientTop = isDark ? const Color(0x80000000) : const Color(0x99F6F4F0);
 

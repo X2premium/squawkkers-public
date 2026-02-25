@@ -186,13 +186,14 @@ class _TweetVideoState extends State<TweetVideo> with AutomaticKeepAliveClientMi
       looping: widget.loop,
       videoPlayerController: _videoController!,
       errorBuilder: (context, errorMessage) {
+        final iconColor = Theme.of(context).colorScheme.onInverseSurface;
         return Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
+              Icon(
                 Symbols.error_rounded,
-                color: Colors.white,
+                color: iconColor,
                 size: 42,
               ),
               Text(errorMessage)
@@ -225,6 +226,7 @@ class _TweetVideoState extends State<TweetVideo> with AutomaticKeepAliveClientMi
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    final iconColor = Theme.of(context).colorScheme.onInverseSurface;
     // TODO: This is a bit flickery, but will do for now
     return AspectRatio(
       aspectRatio: widget.metadata.aspectRatio,
@@ -245,7 +247,7 @@ class _TweetVideoState extends State<TweetVideo> with AutomaticKeepAliveClientMi
                 Center(
                   child: CenterPlayButton(
                     backgroundColor: Colors.black54,
-                    iconColor: Colors.white,
+                    iconColor: iconColor,
                     isFinished: false,
                     isPlaying: false,
                     show: true,

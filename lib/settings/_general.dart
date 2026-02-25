@@ -474,9 +474,10 @@ class ExclusionsFeedSettingState extends State<ExclusionsFeedSetting> {
   Widget _textfieldBtn(int index) {
     bool isLast = (index == _exclusionsFeedLst.length - 1);
     final buttonColor = isLast ? Colors.green : Colors.red;
+    final theme = Theme.of(context);
     final iconColor = ThemeData.estimateBrightnessForColor(buttonColor) == Brightness.dark
-        ? Colors.white
-        : Colors.black;
+        ? theme.colorScheme.onPrimary
+        : theme.colorScheme.onSurface;
 
     return InkWell(
       onTap: () {
