@@ -140,8 +140,12 @@ class AppTheme {
         style: MenuStyle(
           backgroundColor: MaterialStatePropertyAll(scheme.surfaceContainerHigh),
           surfaceTintColor: const MaterialStatePropertyAll(Colors.transparent),
-          foregroundColor: MaterialStatePropertyAll(scheme.onSurface),
         ),
+      ),
+      popupMenuTheme: PopupMenuThemeData(
+        color: scheme.surfaceContainerHigh,
+        surfaceTintColor: Colors.transparent,
+        textStyle: textTheme.bodyMedium?.copyWith(color: scheme.onSurface),
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
