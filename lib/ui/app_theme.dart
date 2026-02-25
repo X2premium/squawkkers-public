@@ -3,9 +3,17 @@ import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
   static const double _radius = 18;
+  static const Color _seed = Color(0xFF0B6E6B);
+  static const Color _lightBg = Color(0xFFF6F4F0);
+  static const Color _darkBg = Color(0xFF0C0F12);
 
   static ThemeData applyBase(ThemeData base, {required bool trueBlack}) {
-    var scheme = base.colorScheme;
+    var scheme = ColorScheme.fromSeed(
+      seedColor: _seed,
+      brightness: base.brightness,
+      background: base.brightness == Brightness.dark ? _darkBg : _lightBg,
+    );
+
     if (base.brightness == Brightness.dark && trueBlack) {
       scheme = scheme.copyWith(
         surface: Colors.black,
@@ -17,24 +25,26 @@ class AppTheme {
         surfaceContainerHighest: const Color(0xFF1C1C1C),
       );
     }
-    final textTheme = GoogleFonts.manropeTextTheme(base.textTheme).copyWith(
-      displaySmall: GoogleFonts.manrope(fontSize: 36, fontWeight: FontWeight.w700, letterSpacing: -0.5),
-      headlineSmall: GoogleFonts.manrope(fontSize: 24, fontWeight: FontWeight.w700, letterSpacing: -0.3),
-      titleLarge: GoogleFonts.manrope(fontSize: 20, fontWeight: FontWeight.w600),
-      titleMedium: GoogleFonts.manrope(fontSize: 16, fontWeight: FontWeight.w600),
-      bodyLarge: GoogleFonts.manrope(fontSize: 16, fontWeight: FontWeight.w400, height: 1.3),
-      bodyMedium: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.w400, height: 1.3),
-      labelLarge: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.w600),
+    final textTheme = GoogleFonts.interTightTextTheme(base.textTheme).copyWith(
+      displaySmall: GoogleFonts.spaceGrotesk(fontSize: 36, fontWeight: FontWeight.w700, letterSpacing: -0.6),
+      headlineSmall: GoogleFonts.spaceGrotesk(fontSize: 24, fontWeight: FontWeight.w700, letterSpacing: -0.4),
+      titleLarge: GoogleFonts.spaceGrotesk(fontSize: 20, fontWeight: FontWeight.w600),
+      titleMedium: GoogleFonts.spaceGrotesk(fontSize: 16, fontWeight: FontWeight.w600),
+      bodyLarge: GoogleFonts.interTight(fontSize: 16, fontWeight: FontWeight.w400, height: 1.35),
+      bodyMedium: GoogleFonts.interTight(fontSize: 14, fontWeight: FontWeight.w400, height: 1.35),
+      labelLarge: GoogleFonts.spaceGrotesk(fontSize: 14, fontWeight: FontWeight.w600),
     );
 
     final outline = scheme.outlineVariant.withOpacity(base.brightness == Brightness.dark ? 0.5 : 0.7);
     final cardColor = scheme.surfaceContainerLow;
+    final elevated = scheme.surfaceContainerHigh;
 
     return base.copyWith(
+      colorScheme: scheme,
       textTheme: textTheme,
       primaryTextTheme: textTheme,
-      scaffoldBackgroundColor: scheme.surface,
-      canvasColor: scheme.surface,
+      scaffoldBackgroundColor: scheme.background,
+      canvasColor: scheme.background,
       dividerTheme: DividerThemeData(
         color: outline,
         space: 24,
@@ -58,7 +68,7 @@ class AppTheme {
       appBarTheme: AppBarTheme(
         elevation: 0,
         centerTitle: false,
-        backgroundColor: scheme.surface,
+        backgroundColor: scheme.background,
         surfaceTintColor: Colors.transparent,
         foregroundColor: scheme.onSurface,
         titleTextStyle: textTheme.titleLarge?.copyWith(color: scheme.onSurface),
@@ -79,7 +89,7 @@ class AppTheme {
             size: 22,
           ),
         ),
-        backgroundColor: scheme.surfaceContainer,
+        backgroundColor: elevated,
         surfaceTintColor: Colors.transparent,
       ),
       chipTheme: base.chipTheme.copyWith(
@@ -106,19 +116,19 @@ class AppTheme {
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
-        backgroundColor: scheme.surfaceContainerHighest,
+        backgroundColor: elevated,
         contentTextStyle: textTheme.bodyMedium?.copyWith(color: scheme.onSurface),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
       bottomSheetTheme: BottomSheetThemeData(
-        backgroundColor: scheme.surface,
+        backgroundColor: elevated,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(top: Radius.circular(_radius)),
         ),
       ),
       dialogTheme: DialogThemeData(
-        backgroundColor: scheme.surface,
+        backgroundColor: elevated,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(_radius)),
         titleTextStyle: textTheme.titleLarge?.copyWith(color: scheme.onSurface),
@@ -164,9 +174,57 @@ class AppTheme {
     if (child == null) {
       return const SizedBox.shrink();
     }
-    return ColoredBox(
-      color: Theme.of(context).scaffoldBackgroundColor,
-      child: child,
+    final scheme = Theme.of(context).colorScheme;
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: Theme.of(context).brightness == Brightness.dark
+                    ? [
+                        trueBlack ? Colors.black : _darkBg,
+                        scheme.primary.withOpacity(0.08),
+                        _darkBg,
+                      ]
+                    : [
+                        _lightBg,
+                        scheme.primary.withOpacity(0.08),
+                        _lightBg,
+                      ],
+                stops: const [0.0, 0.5, 1.0],
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          right: -80,
+          top: -60,
+          child: Container(
+            width: 220,
+            height: 220,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: scheme.primary.withOpacity(0.08),
+            ),
+          ),
+        ),
+        Positioned(
+          left: -60,
+          bottom: -40,
+          child: Container(
+            width: 200,
+            height: 200,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: scheme.tertiary.withOpacity(0.08),
+            ),
+          ),
+        ),
+        child,
+      ],
     );
   }
 }
