@@ -1125,13 +1125,52 @@ class Twitter {
             [],
       );
     }
-    if (instructions.isEmpty ||
-        !instructions.any(
-          (e) =>
-              e['__typename'] == 'TimelineAddEntries' ||
-              e['type'] == 'TimelineAddEntries',
-        )) {
+    if (instructions.isEmpty) {
+      instructions = List.from(
+        parentResult['data']?['user_result_by_rest_id']?['result']?['timeline_response']?['timeline']?['instructions'] ??
+            [],
+      );
+    }
+    if (instructions.isEmpty) {
+      instructions = List.from(
+        parentResult['data']?['user_result_by_screen_name']?['result']?['timeline_response']?['timeline']?['instructions'] ??
+            [],
+      );
+    }
+    if (instructions.isEmpty) {
       return TweetStatus(chains: [], cursorBottom: null, cursorTop: null);
+    }
+
+    Map<String, dynamic>? normalizeResult(dynamic rawResult) {
+      if (rawResult is! Map<String, dynamic>) {
+        return null;
+      }
+      var result = rawResult;
+      result = result['rest_id'] != null
+          ? result
+          : (result['tweet'] as Map<String, dynamic>? ?? result);
+      return result['rest_id'] == null ? null : result;
+    }
+
+    Map<String, dynamic>? extractResult(dynamic node) {
+      if (node is! Map<String, dynamic>) {
+        return null;
+      }
+
+      var direct =
+          node['result'] ??
+          node['tweet_results']?['result'] ??
+          node['tweetResult']?['result'] ??
+          node['content']?['tweetResult']?['result'] ??
+          node['content']?['itemContent']?['tweet_results']?['result'] ??
+          node['itemContent']?['tweet_results']?['result'] ??
+          node['item']?['itemContent']?['tweet_results']?['result'] ??
+          node['item']?['content']?['tweetResult']?['result'] ??
+          node['item']?['content']?['itemContent']?['tweet_results']?['result'] ??
+          node['entry']?['content']?['content']?['tweetResult']?['result'] ??
+          node['entry']?['content']?['itemContent']?['tweet_results']?['result'];
+
+      return normalizeResult(direct);
     }
 
     List pinEntries = List.from(
@@ -1142,79 +1181,93 @@ class Twitter {
       ),
     );
     List addEntries = List.from(
-      instructions.firstWhere(
-        (e) =>
-            e['__typename'] == 'TimelineAddEntries' ||
-            e['type'] == 'TimelineAddEntries',
-      )['entries'],
+      instructions
+          .where(
+            (e) =>
+                e['__typename'] == 'TimelineAddEntries' ||
+                e['type'] == 'TimelineAddEntries',
+          )
+          .expand((e) => List.from(e['entries'] ?? [])),
     );
+    if (addEntries.isEmpty) {
+      return TweetStatus(chains: [], cursorBottom: null, cursorTop: null);
+    }
 
     List<TweetChain> chains = [];
+    Set<String> seenIds = {};
+
+    void addChainFromResult(dynamic source, {required bool isPinned}) {
+      Map<String, dynamic>? result = extractResult(source);
+      if (result == null) {
+        return;
+      }
+      var id = result['rest_id'] as String?;
+      if (id == null || seenIds.contains(id)) {
+        return;
+      }
+      TweetWithCard tc = TweetWithCard.fromGraphqlJson(result);
+      if (!includeReplies && !isPinned && tc.inReplyToStatusIdStr != null) {
+        return;
+      }
+      chains.add(
+        TweetChain(id: id, tweets: [tc], isPinned: isPinned),
+      );
+      seenIds.add(id);
+    }
 
     for (Map<String, dynamic> pinEntry in pinEntries) {
-      Map<String, dynamic>? result =
-          pinEntry["entry"]?["content"]?["content"]?["tweetResult"]?["result"];
-      result ??=
-          pinEntry["entry"]?["content"]?["itemContent"]?["tweet_results"]?["result"];
-      if (result != null) {
-        result = result['rest_id'] != null ? result : result['tweet'];
-        if (result != null) {
-          TweetWithCard tc = TweetWithCard.fromGraphqlJson(result);
-          chains.add(
-            TweetChain(id: result['rest_id'], tweets: [tc], isPinned: true),
-          );
-        }
-      }
+      addChainFromResult(pinEntry, isPinned: true);
+      addChainFromResult(pinEntry['entry'], isPinned: true);
     }
 
     String? cursorTop;
     String? cursorBottom;
     for (Map<String, dynamic> addEntry in addEntries) {
       String entryId = addEntry['entryId'] ?? '';
-      if (entryId.startsWith('tweet-')) {
-        Map<String, dynamic>? result =
-            addEntry["content"]?["content"]?["tweetResult"]?["result"];
-        result ??=
-            addEntry["content"]?["itemContent"]?["tweet_results"]?["result"];
-        if (result != null) {
-          result = result['rest_id'] != null ? result : result['tweet'];
-          if (result != null) {
-            TweetWithCard tc = TweetWithCard.fromGraphqlJson(result);
-            //tweets.add(tc);
-            chains.add(
-              TweetChain(id: result['rest_id'], tweets: [tc], isPinned: false),
-            );
-          }
-        }
-      } else if (entryId.contains('-conversation-') ||
-          entryId.startsWith('homeConversation-')) {
-        List<TweetWithCard> tweets = [];
-        for (Map<String, dynamic> item in List.from(
-          addEntry['content']?['items'] ?? [],
-        )) {
-          Map<String, dynamic>? result =
-              item['item']?['content']?['tweetResult']?['result'];
-          if (result != null) {
-            result = result['rest_id'] != null ? result : result['tweet'];
-            if (result != null) {
-              TweetWithCard tc = TweetWithCard.fromGraphqlJson(result);
-              tweets.add(tc);
-            }
-          }
-        }
-        if (tweets.isNotEmpty) {
-          chains.add(
-            TweetChain(
-              id: tweets[0].conversationIdStr!,
-              tweets: tweets,
-              isPinned: false,
-            ),
-          );
-        }
-      } else if (entryId.startsWith('cursor-top-')) {
-        cursorTop = addEntry['content']?['value'];
-      } else if (entryId.startsWith('cursor-bottom-')) {
-        cursorBottom = addEntry['content']?['value'];
+      if (entryId.startsWith('cursor-top-')) {
+        cursorTop =
+            addEntry['content']?['value'] ??
+            addEntry['content']?['operation']?['cursor']?['value'] ??
+            cursorTop;
+        continue;
+      }
+      if (entryId.startsWith('cursor-bottom-') ||
+          entryId.startsWith('cursor-showMore-')) {
+        cursorBottom =
+            addEntry['content']?['value'] ??
+            addEntry['content']?['operation']?['cursor']?['value'] ??
+            cursorBottom;
+        continue;
+      }
+
+      addChainFromResult(addEntry, isPinned: false);
+      addChainFromResult(addEntry['content'], isPinned: false);
+
+      for (Map<String, dynamic> item in List<Map<String, dynamic>>.from(
+        addEntry['content']?['items'] ?? [],
+      )) {
+        addChainFromResult(item, isPinned: false);
+        addChainFromResult(item['item'], isPinned: false);
+        addChainFromResult(item['entry'], isPinned: false);
+        addChainFromResult(item['content'], isPinned: false);
+      }
+
+      for (Map<String, dynamic> item in List<Map<String, dynamic>>.from(
+        addEntry['content']?['timelineModule']?['items'] ?? [],
+      )) {
+        addChainFromResult(item, isPinned: false);
+        addChainFromResult(item['item'], isPinned: false);
+        addChainFromResult(item['entry'], isPinned: false);
+        addChainFromResult(item['content'], isPinned: false);
+      }
+
+      for (Map<String, dynamic> item in List<Map<String, dynamic>>.from(
+        addEntry['content']?['moduleItems'] ?? [],
+      )) {
+        addChainFromResult(item, isPinned: false);
+        addChainFromResult(item['item'], isPinned: false);
+        addChainFromResult(item['entry'], isPinned: false);
+        addChainFromResult(item['content'], isPinned: false);
       }
     }
 

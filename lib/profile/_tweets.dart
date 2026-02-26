@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:pref/pref.dart';
 
 import 'package:squawker/client/client.dart';
 import 'package:squawker/client/client_account.dart';
+import 'package:squawker/constants.dart';
 import 'package:squawker/profile/profile.dart';
 import 'package:squawker/tweet/conversation.dart';
 import 'package:squawker/ui/cursor_paging.dart';
@@ -33,6 +35,73 @@ class _ProfileTweetsState extends State<ProfileTweets> with AutomaticKeepAliveCl
   @override
   bool get wantKeepAlive => true;
 
+  Future<TweetStatus> _fetchPageGraphql() {
+    return Twitter.getUserWithProfileGraphql(
+      widget.user.idStr!,
+      widget.type,
+      widget.pinnedTweets,
+      cursor: _pagingState.cursor,
+      count: pageSize,
+      includeReplies: widget.includeReplies,
+    );
+  }
+
+  Future<TweetStatus> _fetchPageLegacy() {
+    return Twitter.getTweets(
+      widget.user.idStr!,
+      widget.type,
+      widget.pinnedTweets,
+      cursor: _pagingState.cursor,
+      count: pageSize,
+      includeReplies: widget.includeReplies,
+    );
+  }
+
+  Future<TweetStatus> _fetchPageGuestProfileOnly() {
+    return Twitter.getUserTweets(
+      widget.user.idStr!,
+      widget.type,
+      widget.pinnedTweets,
+      count: pageSize,
+      includeReplies: widget.includeReplies,
+    );
+  }
+
+  Future<TweetStatus> _fetchWithFallback() async {
+    final useEnhanced = PrefService.of(context, listen: false).get(optionEnhancedProfile);
+    final hasAccount = TwitterAccount.hasAccountAvailable();
+
+    Future<TweetStatus> tryLegacy() async {
+      try {
+        return await _fetchPageLegacy();
+      } catch (_) {
+        if (!hasAccount && widget.type == 'profile' && _pagingState.cursor == null) {
+          return _fetchPageGuestProfileOnly();
+        }
+        rethrow;
+      }
+    }
+
+    if (useEnhanced) {
+      try {
+        final gqlResult = await _fetchPageGraphql();
+        if (gqlResult.chains.isNotEmpty || _pagingState.cursor != null) {
+          return gqlResult;
+        }
+      } catch (_) {}
+      return tryLegacy();
+    }
+
+    try {
+      final legacyResult = await tryLegacy();
+      if (legacyResult.chains.isNotEmpty || _pagingState.cursor != null || widget.type != 'media') {
+        return legacyResult;
+      }
+    } catch (_) {}
+
+    return _fetchPageGraphql();
+  }
+
   Future<void> _fetchNextPage() async {
     if (_pagingState.isLoading) return;
 
@@ -41,25 +110,31 @@ class _ProfileTweetsState extends State<ProfileTweets> with AutomaticKeepAliveCl
     });
 
     try {
-      TweetStatus result;
-      result = await Twitter.getUserWithProfileGraphql(
-        widget.user.idStr!,
-        widget.type,
-        widget.pinnedTweets,
-        cursor: _pagingState.cursor,
-        count: pageSize,
-        includeReplies: widget.includeReplies,
-      );
+      TweetStatus result = await _fetchWithFallback();
 
       if (!mounted) {
         return;
       }
 
-      bool hasNextPage = result.chains.isNotEmpty;
+      bool hasNextPage =
+          result.chains.isNotEmpty &&
+          result.cursorBottom != null &&
+          result.cursorBottom != _pagingState.cursor;
+
+      var pages = [...?_pagingState.pages];
+      if (result.chains.isNotEmpty) {
+        pages.add(result.chains);
+      }
+
+      var keys = [...?_pagingState.keys];
+      if (hasNextPage) {
+        keys.add(result.cursorBottom);
+      }
+
       setState(() {
         _pagingState = _pagingState.copyWithEx(
-          pages: [...?_pagingState.pages, result.chains],
-          keys: [...?_pagingState.keys, result.cursorBottom],
+          pages: pages,
+          keys: keys,
           hasNextPage: hasNextPage,
           isLoading: false,
         );
