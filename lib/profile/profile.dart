@@ -373,7 +373,7 @@ class _ProfileScreenBodyState extends State<ProfileScreenBody> with TickerProvid
                                             child: RichText(
                                                 maxLines: 3,
                                                 text: TextSpan(
-                                                    style: const TextStyle(height: 1.4),
+                                                    style: TextStyle(height: 1.4, color: headerPrimaryColor),
                                                     children: _addLinksToText(context, user.description!)))),
                                       ),
                                     MeasureSize(
