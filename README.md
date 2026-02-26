@@ -26,7 +26,7 @@
 
 * Latest release page: https://github.com/X2premium/squawkkers-public/releases/latest
 * Latest universal APK: https://github.com/X2premium/squawkkers-public/releases/latest/download/squawkkers-universal.apk
-* Current app version: `3.8.8` (build `51`)
+* Current app version: `3.8.9` (build `52`)
 
 <p align="center">
   There is also an alternate F-Droid repository that allows updates for Squawker to be available faster than on the default F-Droid repository.
@@ -64,6 +64,13 @@ Compared to the original Fritter/Quacker baseline, this fork includes:
 * Swipe physics tuning to prevent non-stop/looping horizontal slide behavior
 * Android package migration to `com.x2premium.squawkkers` and updated launcher icon colors/assets
 * About screen and update-check links updated to this repository (`X2premium/squawkkers-public`)
+* Profile bio text readability fix in light mode (removed white-on-light description rendering)
+* Profile tab behavior fixes for Tweets / Tweets & Replies / Media routing and state isolation
+* Profile header/tab overlap fix (tab labels no longer merge into profile bio/metadata)
+* Media timeline parsing hardening for additional X timeline entry formats
+* Replies timeline fallback improvements when upstream query shapes vary
+* Saved tab duplication-loop fix (no infinite repeated saved tweets while scrolling)
+* Retry callback fixes on profile/saved tab error states
  
 ## Features:
 
