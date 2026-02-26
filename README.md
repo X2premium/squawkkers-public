@@ -26,6 +26,7 @@
 
 * Latest release page: https://github.com/X2premium/squawkkers-public/releases/latest
 * Latest universal APK: https://github.com/X2premium/squawkkers-public/releases/latest/download/squawkkers-universal.apk
+* Current app version: `3.8.8` (build `51`)
 
 <p align="center">
   There is also an alternate F-Droid repository that allows updates for Squawker to be available faster than on the default F-Droid repository.
