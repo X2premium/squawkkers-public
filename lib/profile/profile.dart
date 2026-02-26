@@ -147,6 +147,9 @@ class _ProfileScreenBodyState extends State<ProfileScreenBody> with TickerProvid
 
     String initialTabStr = widget.prefs.get(optionSubscriptionInitialTab);
     int initialTabIdx = defaultSubscriptionTabs.indexWhere((e) => e.id == initialTabStr);
+    if (initialTabIdx < 0) {
+      initialTabIdx = 0;
+    }
 
     _tabController = TabController(length: 4, vsync: this, initialIndex: initialTabIdx);
 
@@ -160,6 +163,7 @@ class _ProfileScreenBodyState extends State<ProfileScreenBody> with TickerProvid
   @override
   void dispose() {
     nestedScrollViewKey.currentState?.innerController.removeListener(_listen);
+    _tabController.dispose();
 
     super.dispose();
   }
@@ -568,10 +572,14 @@ class _ProfileScreenBodyState extends State<ProfileScreenBody> with TickerProvid
               physics: const LessSensitiveScrollPhysics(),
               children: [
                 ProfileTweets(
+                    key: ValueKey('profile-${user.idStr}-tweets'),
                     user: user, type: 'profile', includeReplies: false, pinnedTweets: widget.profile.pinnedTweets),
                 ProfileTweets(
-                    user: user, type: 'profile', includeReplies: true, pinnedTweets: widget.profile.pinnedTweets),
-                ProfileTweets(user: user, type: 'media', includeReplies: false, pinnedTweets: const []),
+                    key: ValueKey('profile-${user.idStr}-tweets-replies'),
+                    user: user, type: 'profile', includeReplies: true, pinnedTweets: const []),
+                ProfileTweets(
+                    key: ValueKey('profile-${user.idStr}-media'),
+                    user: user, type: 'media', includeReplies: false, pinnedTweets: const []),
                 ProfileSaved(user: user),
               ],
             ),

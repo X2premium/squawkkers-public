@@ -55,8 +55,8 @@ class _ProfileTweetsState extends State<ProfileTweets> with AutomaticKeepAliveCl
         }
       }
       else {
-        result = await Twitter.getUserTweets(widget.user.idStr!, widget.type, widget.pinnedTweets,
-          count: pageSize, includeReplies: widget.includeReplies);
+        result = await Twitter.getUserWithProfileGraphql(widget.user.idStr!, widget.type, widget.pinnedTweets,
+          cursor: _pagingState.cursor, count: pageSize, includeReplies: widget.includeReplies);
       }
 
       if (!mounted) {
@@ -124,13 +124,13 @@ class _ProfileTweetsState extends State<ProfileTweets> with AutomaticKeepAliveCl
               error: (_pagingState.error as List)[0],
               stackTrace: (_pagingState.error as List)[1],
               prefix: L10n.of(context).unable_to_load_the_tweets,
-              onRetry: () => _fetchNextPage,
+              onRetry: _fetchNextPage,
             ),
             newPageErrorIndicatorBuilder: (context) => FullPageErrorWidget(
               error: (_pagingState.error as List)[0],
               stackTrace: (_pagingState.error as List)[1],
               prefix: L10n.of(context).unable_to_load_the_next_page_of_tweets,
-              onRetry: () =>_fetchNextPage,
+              onRetry: _fetchNextPage,
             ),
             noItemsFoundIndicatorBuilder: (context) {
               return Center(
