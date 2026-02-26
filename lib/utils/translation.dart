@@ -23,7 +23,11 @@ class TranslationAPIResult {
   final dynamic body;
   final String? errorMessage;
 
-  TranslationAPIResult({required this.success, required this.body, this.errorMessage});
+  TranslationAPIResult({
+    required this.success,
+    required this.body,
+    this.errorMessage,
+  });
 }
 
 // TODO
@@ -35,27 +39,16 @@ class TranslationAPI {
   // other possibilities working but badly translated:
   //   translate.terraprint.co
   static final default_translation_hosts = [
-    {
-      'host': 'libretranslate.de',
-      'api_key': null
-    },
-    {
-      'host': 'translate.fedilab.app',
-      'api_key': null
-    },
-    {
-      'host': 'translate.argosopentech.com',
-      'api_key': null
-    }
+    {'host': 'libretranslate.de', 'api_key': null},
+    {'host': 'translate.fedilab.app', 'api_key': null},
+    {'host': 'translate.argosopentech.com', 'api_key': null},
   ];
-  static List<Map<String,dynamic>>? _translation_hosts;
-  static int current_translation_host_idx = 0; // Random().nextInt(translation_hosts.length);
-  static Map<String, String> langCodeReplace = {
-    'iw': 'he',
-    'in': 'id'
-  };
+  static List<Map<String, dynamic>>? _translation_hosts;
+  static int current_translation_host_idx =
+      0; // Random().nextInt(translation_hosts.length);
+  static Map<String, String> langCodeReplace = {'iw': 'he', 'in': 'id'};
 
-  static List<Map<String,dynamic>> translationHosts() {
+  static List<Map<String, dynamic>> translationHosts() {
     _translation_hosts ??= default_translation_hosts;
     return _translation_hosts!;
   }
@@ -65,12 +58,12 @@ class TranslationAPI {
     return _translation_hosts!.length;
   }
 
-  static Map<String,dynamic> translationHost() {
+  static Map<String, dynamic> translationHost() {
     _translation_hosts ??= default_translation_hosts;
     return _translation_hosts![current_translation_host_idx];
   }
 
-  static Map<String,dynamic> nextTranslationHost() {
+  static Map<String, dynamic> nextTranslationHost() {
     _translation_hosts ??= default_translation_hosts;
     current_translation_host_idx++;
     if (current_translation_host_idx == _translation_hosts!.length) {
@@ -79,18 +72,21 @@ class TranslationAPI {
     return translationHost();
   }
 
-  static String setTranslationHosts(List<Map<String,dynamic>>? translationHosts) {
+  static String setTranslationHosts(
+    List<Map<String, dynamic>>? translationHosts,
+  ) {
     _translation_hosts = translationHosts;
     _translation_hosts ??= default_translation_hosts;
     return jsonEncode(_translation_hosts);
   }
 
-  static List<Map<String,dynamic>> setTranslationHostsFromStr(String? translationHosts) {
+  static List<Map<String, dynamic>> setTranslationHostsFromStr(
+    String? translationHosts,
+  ) {
     if (translationHosts == null) {
       _translation_hosts = default_translation_hosts;
-    }
-    else {
-      List<Map<String,dynamic>> lst = [];
+    } else {
+      List<Map<String, dynamic>> lst = [];
       for (dynamic item in jsonDecode(translationHosts)) {
         lst.add(item);
       }
@@ -105,35 +101,53 @@ class TranslationAPI {
     return cacheRequest(key, () async {
       int connectTries = 0;
       String? errorMessage;
-      while (connectTries < translationHostsLength()){
+      while (connectTries < translationHostsLength()) {
         String trHost = translationHost()['host'];
         try {
-          var response = await AppHttpClient.httpGet(Uri.https(trHost, '/languages')).timeout(const Duration(seconds: 3));
+          var response = await AppHttpClient.httpGet(
+            Uri.https(trHost, '/languages'),
+          ).timeout(const Duration(seconds: 3));
           TranslationAPIResult rsp = await parseResponse(response);
           if (rsp.success) {
             return rsp;
-          }
-          else {
-            errorMessage ??= 'get supported languages error ${rsp.errorMessage} from host $trHost';
-            log.warning('get supported languages error ${rsp.errorMessage} from host $trHost');
+          } else {
+            errorMessage ??=
+                'get supported languages error ${rsp.errorMessage} from host $trHost';
+            log.warning(
+              'get supported languages error ${rsp.errorMessage} from host $trHost',
+            );
           }
         } on TimeoutException {
           errorMessage ??= 'get supported languages timeout from host $trHost';
           log.warning('get supported languages timeout from host $trHost');
         } catch (exc) {
-          errorMessage ??= 'get supported languages error from $trHost\n${exc.toString()}';
-          log.warning('get supported languages error from $trHost\n${exc.toString()}');
+          errorMessage ??=
+              'get supported languages error from $trHost\n${exc.toString()}';
+          log.warning(
+            'get supported languages error from $trHost\n${exc.toString()}',
+          );
         }
         nextTranslationHost();
         connectTries++;
       }
-      return TranslationAPIResult(success: false, body: '', errorMessage: errorMessage ?? 'Unable to get supported languages');
+      return TranslationAPIResult(
+        success: false,
+        body: '',
+        errorMessage: errorMessage ?? 'Unable to get supported languages',
+      );
       //throw Exception('Unable to get supported languages');
     });
   }
 
-  static Future<TranslationAPIResult> translate(BuildContext context, String id, List<String> text, String sourceLanguage) async {
-    var actualSourceLanguage = langCodeReplace.containsKey(sourceLanguage) ? langCodeReplace[sourceLanguage] : sourceLanguage;
+  static Future<TranslationAPIResult> translate(
+    BuildContext context,
+    String id,
+    List<String> text,
+    String sourceLanguage,
+  ) async {
+    var actualSourceLanguage = langCodeReplace.containsKey(sourceLanguage)
+        ? langCodeReplace[sourceLanguage]
+        : sourceLanguage;
     var hasTextOrNot = text.map((e) => e.isNotEmpty ? true : false).toList();
     var targetLanguage = Localizations.localeOf(context).languageCode;
 
@@ -142,7 +156,7 @@ class TranslationAPI {
       'q': text.where((e) => e.isNotEmpty).toList(),
       'source': actualSourceLanguage,
       'target': targetLanguage,
-      'format': 'text'
+      'format': 'text',
     };
 
     var key = 'translation.$actualSourceLanguage.$targetLanguage.$id';
@@ -152,20 +166,22 @@ class TranslationAPI {
       String? errorMessage;
       while (connectTries < translationHostsLength()) {
         String trHost = translationHost()['host'];
-        var data = {
-          ...formData,
-          'api_key': translationHost()['api_key']
-        };
+        var data = {...formData, 'api_key': translationHost()['api_key']};
         try {
-          var response = await AppHttpClient.httpPost(Uri.https(trHost, '/translate'),
-            body: jsonEncode(data), headers: {'Content-Type': 'application/json'}).timeout(const Duration(seconds: 3));
+          var response = await AppHttpClient.httpPost(
+            Uri.https(trHost, '/translate'),
+            body: jsonEncode(data),
+            headers: {'Content-Type': 'application/json'},
+          ).timeout(const Duration(seconds: 3));
           TranslationAPIResult rsp = await parseResponse(response);
           if (rsp.success) {
             return rsp;
-          }
-          else {
-            errorMessage ??= 'translate error ${rsp.errorMessage} from host $trHost';
-            log.warning('translate error ${rsp.errorMessage} from host $trHost');
+          } else {
+            errorMessage ??=
+                'translate error ${rsp.errorMessage} from host $trHost';
+            log.warning(
+              'translate error ${rsp.errorMessage} from host $trHost',
+            );
           }
         } on TimeoutException {
           errorMessage ??= 'translate timeout from host $trHost';
@@ -177,7 +193,11 @@ class TranslationAPI {
         nextTranslationHost();
         connectTries++;
       }
-      return TranslationAPIResult(success: false, body: '', errorMessage: errorMessage ?? 'Unable to send translation request');
+      return TranslationAPIResult(
+        success: false,
+        body: '',
+        errorMessage: errorMessage ?? 'Unable to send translation request',
+      );
       //throw Exception('Unable to send translation request');
     });
 
@@ -186,20 +206,33 @@ class TranslationAPI {
       var translatedTexts = List.from(res.body['translatedText']);
 
       var translatedIndex = 0;
-      var result =
-          hasTextOrNot.mapWithIndex((hasText, i) => hasText ? translatedTexts[translatedIndex++] : text[i]).toList();
+      var result = hasTextOrNot
+          .mapWithIndex(
+            (hasText, i) =>
+                hasText ? translatedTexts[translatedIndex++] : text[i],
+          )
+          .toList();
 
-      return TranslationAPIResult(success: res.success, body: {'translatedText': result});
+      return TranslationAPIResult(
+        success: res.success,
+        body: {'translatedText': result},
+      );
     }
 
     return res;
   }
 
   static Future<TranslationAPIResult> cacheRequest(
-      String key, Future<TranslationAPIResult> Function() makeRequest) async {
+    String key,
+    Future<TranslationAPIResult> Function() makeRequest,
+  ) async {
     var result = await cache.load(key);
-    if (result != null && result == true) {
-      return TranslationAPIResult(success: true, body: jsonDecode(result));
+    if (result is String && result.isNotEmpty) {
+      try {
+        return TranslationAPIResult(success: true, body: jsonDecode(result));
+      } on FormatException {
+        // Ignore invalid cache payloads and fetch a fresh response.
+      }
     }
 
     // Otherwise, make the request
@@ -215,7 +248,9 @@ class TranslationAPI {
     return response;
   }
 
-  static Future<TranslationAPIResult> parseResponse(http.Response response) async {
+  static Future<TranslationAPIResult> parseResponse(
+    http.Response response,
+  ) async {
     // the server does not return a content-type header with the UTF-8 charset specified, so we must force the decoding from UTF-8
     var body = jsonDecode(utf8.decode(response.bodyBytes));
     if (response.statusCode == 200) {
@@ -249,6 +284,10 @@ class TranslationAPI {
         break;
     }
 
-    return TranslationAPIResult(success: false, body: body, errorMessage: message);
+    return TranslationAPIResult(
+      success: false,
+      body: body,
+      errorMessage: message,
+    );
   }
 }

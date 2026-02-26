@@ -1,7 +1,7 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
 import 'package:pref/pref.dart';
 import 'dart:math';
+import 'package:squawker/client/app_http_client.dart';
 import 'package:squawker/database/entities.dart';
 import 'package:squawker/constants.dart';
 
@@ -22,49 +22,66 @@ class TwitterHeaders {
     'x-twitter-client-language': 'en',
   };
 
-  static Future<Map<String, String>?> getXClientTransactionIdHeader(Uri? uri) async {
+  static Future<Map<String, String>?> getXClientTransactionIdHeader(
+    Uri? uri,
+  ) async {
     if (uri == null) {
       return null;
     }
 
     final path = uri.path;
     final prefs = await PrefServiceShared.init(prefix: 'pref_');
-    final xClientTransactionIdDomain = prefs.get(optionXClientTransactionIdProvider) ?? optionXClientTransactionIdProviderDefaultDomain;
-    final xClientTransactionUriEndPoint = Uri.http(xClientTransactionIdDomain, '/generate-x-client-transaction-id', {'path': path});
+    final xClientTransactionIdDomain =
+        prefs.get(optionXClientTransactionIdProvider) ??
+        optionXClientTransactionIdProviderDefaultDomain;
+    final xClientTransactionUriEndPoint = Uri.https(
+      xClientTransactionIdDomain,
+      '/generate-x-client-transaction-id',
+      {'path': path},
+    );
 
     try {
-      final response = await http.get(xClientTransactionUriEndPoint);
+      final response = await AppHttpClient.httpGet(
+        xClientTransactionUriEndPoint,
+      );
 
       if (response.statusCode == 200) {
-        final xClientTransactionId = jsonDecode(response.body)['x-client-transaction-id'];
-        return {
-          'x-client-transaction-id': xClientTransactionId
-        };
+        final xClientTransactionId = jsonDecode(
+          response.body,
+        )['x-client-transaction-id'];
+        return {'x-client-transaction-id': xClientTransactionId};
       } else {
-        throw Exception('Failed to get x-client-transaction-id. Status code: ${response.statusCode}');
+        throw Exception(
+          'Failed to get x-client-transaction-id. Status code: ${response.statusCode}',
+        );
       }
     } catch (e) {
       throw Exception('Error getting x-client-transaction-id: $e');
     }
   }
 
-  static Future<Map<String, String>> getHeaders(Uri? uri) async {
-    final authHeader = await getAuthHeader();
+  static Future<Map<String, String>> getHeaders(
+    Uri? uri, {
+    Map<String, String>? authHeader,
+  }) async {
+    final resolvedAuthHeader = authHeader ?? await getAuthHeader();
     final xClientTransactionIdHeader = await getXClientTransactionIdHeader(uri);
     return {
       ..._baseHeaders,
-      ...?authHeader,
-      ...?xClientTransactionIdHeader
+      ...?resolvedAuthHeader,
+      ...?xClientTransactionIdHeader,
     };
   }
 
-  static Future<Map<dynamic, dynamic>?> getAuthHeader() async {
+  static Future<Map<String, String>?> getAuthHeader() async {
     final accounts = await getAccounts();
-    if(accounts.isEmpty) {
+    if (accounts.isEmpty) {
       return null;
     }
     Account account = accounts[Random().nextInt(accounts.length)];
-    final authHeader = Map.castFrom<String, dynamic, String, String>(json.decode(account.authHeader));
+    final authHeader = Map<String, String>.from(
+      json.decode(account.authHeader) as Map,
+    );
     return authHeader;
   }
 }

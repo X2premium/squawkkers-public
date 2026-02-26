@@ -7,24 +7,30 @@ import 'package:squawker/database/repository.dart';
 class XRegularAccount {
   static final log = Logger('XRegularAccount');
 
-  static Future<http.Response> fetch(Uri uri,
-      {Map<String, String>? headers,
-      required Logger log,
-      required Map<dynamic, dynamic> authHeader}) async {
+  static Future<http.Response> fetch(
+    Uri uri, {
+    Map<String, String>? headers,
+    required Logger log,
+    required Map<String, String> authHeader,
+  }) async {
     log.info('Fetching $uri');
 
-    final baseHeaders = await TwitterHeaders.getHeaders(uri);
+    final baseHeaders = await TwitterHeaders.getHeaders(
+      uri,
+      authHeader: authHeader,
+    );
 
-    var response = await http.get(uri, headers: {
-      ...?headers,
-      ...baseHeaders
-    });
+    var response = await http.get(uri, headers: {...?headers, ...baseHeaders});
 
     return response;
   }
 
   static Future<void> deleteAccount(String username) async {
     var database = await Repository.writable();
-    await database.delete(tableAccounts, where: 'id = ?', whereArgs: [username]);
+    await database.delete(
+      tableAccounts,
+      where: 'id = ?',
+      whereArgs: [username],
+    );
   }
 }
