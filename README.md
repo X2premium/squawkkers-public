@@ -44,14 +44,22 @@
 
 ## This Fork: Fixes & Enhancements
 
-Compared to the original fork history, this repository includes:
+Compared to the original Fritter/Quacker baseline, this fork includes:
 
 * Full Android UI refresh with a modern Material 3 design language (updated typography, spacing, cards, and surfaces)
-* Theme readability fixes across screens (removed remaining hardcoded white text and low-contrast UI states)
+* Theme readability fixes across screens (removed hardcoded white text and low-contrast UI states)
 * Improved tweet card and menu styling for consistent dark/light contrast
 * Video/media download reliability fixes (options-sheet context fix, HTTP fallback headers, and save dialog fallback when storage permission is denied)
 * Subscription import improvements (supports `@username`, profile URLs, and safer comma-separated parsing with lookup fallback)
 * Subscription refresh stability improvements (graceful handling when user lookup endpoints fail)
+* Thread parsing fixes for home timeline chains and reply handling correctness
+* Rate-limit handling fixes in account selection/recovery flows
+* X account header flow fixes (consistent auth header usage on requests)
+* Safer network behavior for transaction-id provider calls (HTTPS + app HTTP client path)
+* Sensitive logging cleanup (removed auth header/token leak prints)
+* Profile credential storage hardening with backward-compatible password encryption at rest
+* Translation cache read-path fix to avoid unnecessary repeat network calls
+* Update-check version comparison fix (semantic version-aware instead of lexicographic string compare)
 * Swipe physics tuning to prevent non-stop/looping horizontal slide behavior
 * Android package migration to `com.x2premium.squawkkers` and updated launcher icon colors/assets
 * About screen and update-check links updated to this repository (`X2premium/squawkkers-public`)
