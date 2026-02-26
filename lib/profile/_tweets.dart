@@ -35,35 +35,35 @@ class _ProfileTweetsState extends State<ProfileTweets> with AutomaticKeepAliveCl
   @override
   bool get wantKeepAlive => true;
 
-  Future<TweetStatus> _fetchPageGraphql() {
+  Future<TweetStatus> _fetchPageGraphql({required bool includeReplies}) {
     return Twitter.getUserWithProfileGraphql(
       widget.user.idStr!,
       widget.type,
       widget.pinnedTweets,
       cursor: _pagingState.cursor,
       count: pageSize,
-      includeReplies: widget.includeReplies,
+      includeReplies: includeReplies,
     );
   }
 
-  Future<TweetStatus> _fetchPageLegacy() {
+  Future<TweetStatus> _fetchPageLegacy({required bool includeReplies}) {
     return Twitter.getTweets(
       widget.user.idStr!,
       widget.type,
       widget.pinnedTweets,
       cursor: _pagingState.cursor,
       count: pageSize,
-      includeReplies: widget.includeReplies,
+      includeReplies: includeReplies,
     );
   }
 
-  Future<TweetStatus> _fetchPageGuestProfileOnly() {
+  Future<TweetStatus> _fetchPageGuestProfileOnly({required bool includeReplies}) {
     return Twitter.getUserTweets(
       widget.user.idStr!,
       widget.type,
       widget.pinnedTweets,
       count: pageSize,
-      includeReplies: widget.includeReplies,
+      includeReplies: includeReplies,
     );
   }
 
@@ -71,35 +71,52 @@ class _ProfileTweetsState extends State<ProfileTweets> with AutomaticKeepAliveCl
     final useEnhanced = PrefService.of(context, listen: false).get(optionEnhancedProfile);
     final hasAccount = TwitterAccount.hasAccountAvailable();
 
-    Future<TweetStatus> tryLegacy() async {
-      try {
-        return await _fetchPageLegacy();
-      } catch (_) {
-        if (!hasAccount && widget.type == 'profile' && _pagingState.cursor == null) {
-          return _fetchPageGuestProfileOnly();
+    Future<TweetStatus> fetchForIncludeReplies(bool includeReplies) async {
+      Future<TweetStatus> tryLegacy() async {
+        try {
+          return await _fetchPageLegacy(includeReplies: includeReplies);
+        } catch (_) {
+          if (!hasAccount && widget.type == 'profile' && _pagingState.cursor == null) {
+            return _fetchPageGuestProfileOnly(includeReplies: includeReplies);
+          }
+          rethrow;
         }
-        rethrow;
       }
-    }
 
-    if (useEnhanced) {
+      if (useEnhanced) {
+        try {
+          final gqlResult = await _fetchPageGraphql(includeReplies: includeReplies);
+          if (gqlResult.chains.isNotEmpty || _pagingState.cursor != null) {
+            return gqlResult;
+          }
+        } catch (_) {}
+        return tryLegacy();
+      }
+
       try {
-        final gqlResult = await _fetchPageGraphql();
-        if (gqlResult.chains.isNotEmpty || _pagingState.cursor != null) {
-          return gqlResult;
+        final legacyResult = await tryLegacy();
+        if (legacyResult.chains.isNotEmpty || _pagingState.cursor != null || widget.type != 'media') {
+          return legacyResult;
         }
       } catch (_) {}
-      return tryLegacy();
+
+      return _fetchPageGraphql(includeReplies: includeReplies);
     }
 
-    try {
-      final legacyResult = await tryLegacy();
-      if (legacyResult.chains.isNotEmpty || _pagingState.cursor != null || widget.type != 'media') {
-        return legacyResult;
-      }
-    } catch (_) {}
+    final result = await fetchForIncludeReplies(widget.includeReplies);
+    if (widget.type == 'profile' &&
+        widget.includeReplies &&
+        _pagingState.cursor == null &&
+        result.chains.isEmpty) {
+      try {
+        final fallbackTweetsOnly = await fetchForIncludeReplies(false);
+        if (fallbackTweetsOnly.chains.isNotEmpty) {
+          return fallbackTweetsOnly;
+        }
+      } catch (_) {}
+    }
 
-    return _fetchPageGraphql();
+    return result;
   }
 
   Future<void> _fetchNextPage() async {

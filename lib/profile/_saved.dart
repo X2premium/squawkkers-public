@@ -37,14 +37,12 @@ class _ProfileSavedState extends State<ProfileSaved> {
       }
 
       var savedTweets = model.state.where((tweet) => tweet.user == widget.user.idStr).toList();
-      var newKey = (_pagingState.keys?.last ?? 0) + 1;
-      var isLastPage = savedTweets.isEmpty;
 
       setState(() {
         _pagingState = _pagingState.copyWith(
-          pages: [...?_pagingState.pages, savedTweets],
-          keys: [...?_pagingState.keys, newKey],
-          hasNextPage: !isLastPage,
+          pages: [savedTweets],
+          keys: const [1],
+          hasNextPage: false,
           isLoading: false,
         );
       });
@@ -86,13 +84,13 @@ class _ProfileSavedState extends State<ProfileSaved> {
             error: (_pagingState.error as List)[0],
             stackTrace: (_pagingState.error as List)[1],
             prefix: L10n.of(context).unable_to_load_the_tweets,
-            onRetry: () => _fetchNextPage,
+            onRetry: _fetchNextPage,
           ),
           newPageErrorIndicatorBuilder: (context) => FullPageErrorWidget(
             error: (_pagingState.error as List)[0],
             stackTrace: (_pagingState.error as List)[1],
             prefix: L10n.of(context).unable_to_load_the_next_page_of_tweets,
-            onRetry: () => _fetchNextPage,
+            onRetry: _fetchNextPage,
           ),
           noItemsFoundIndicatorBuilder: (context) {
             return Center(

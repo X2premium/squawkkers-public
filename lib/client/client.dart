@@ -1405,6 +1405,44 @@ class Twitter {
 
     var tweets = _createTweets(tweetIndicator, result, includeReplies);
 
+    String? extractTweetId(dynamic node) {
+      if (node is! Map<String, dynamic>) {
+        return null;
+      }
+
+      var id =
+          node['content']?['item']?['content']?['tweet']?['id'] ??
+          node['item']?['content']?['tweet']?['id'] ??
+          node['content']?['itemContent']?['tweet_results']?['result']?['rest_id'] ??
+          node['content']?['itemContent']?['tweet_results']?['result']?['tweet']?['rest_id'] ??
+          node['item']?['itemContent']?['tweet_results']?['result']?['rest_id'] ??
+          node['item']?['itemContent']?['tweet_results']?['result']?['tweet']?['rest_id'] ??
+          node['itemContent']?['tweet_results']?['result']?['rest_id'] ??
+          node['itemContent']?['tweet_results']?['result']?['tweet']?['rest_id'];
+
+      return id is String ? id : null;
+    }
+
+    Iterable<dynamic> extractEntryItems(dynamic entry) sync* {
+      if (entry is! Map<String, dynamic>) {
+        return;
+      }
+
+      yield entry;
+
+      for (var item in List.from(entry['content']?['timelineModule']?['items'] ?? [])) {
+        yield item;
+      }
+
+      for (var item in List.from(entry['content']?['items'] ?? [])) {
+        yield item;
+      }
+
+      for (var item in List.from(entry['content']?['moduleItems'] ?? [])) {
+        yield item;
+      }
+    }
+
     // First, get all the IDs of the tweets we need to display
     var tweetEntries = addEntries
         .where(
@@ -1413,21 +1451,9 @@ class Twitter {
               e['entryId'].contains(conversationIndicator),
         )
         .sorted((a, b) => b['sortIndex'].compareTo(a['sortIndex']))
-        .map((e) {
-          if (e['entryId'].contains(tweetIndicator)) {
-            return [e];
-          } else {
-            return e['content']['timelineModule']['items'];
-          }
-        })
-        .expand((e) => e)
-        .map((e) {
-          if (e['content'] != null) {
-            return e['content']['item']['content']['tweet']['id'];
-          } else {
-            return e['item']['content']['tweet']['id'];
-          }
-        })
+        .expand(extractEntryItems)
+        .map(extractTweetId)
+        .whereType<String>()
         .cast<String>()
         .toList();
 
