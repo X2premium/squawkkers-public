@@ -80,7 +80,7 @@ Compared to the original Fritter/Quacker baseline, this fork includes:
   
 ## Screenshots
 
-| <img alt="Screenshot 1" src="https://i.ibb.co/KBh9dBs/Screenshot-2026-02-25-17-20-46-532-com-x2premium-squawkkers.jpg" width="218"/> | <img alt="Screenshot 2" src="https://i.ibb.co/jvL4WvSk/Screenshot-2026-02-25-17-20-51-364-com-x2premium-squawkkers.jpg" width="218"/> | <img alt="Screenshot 3" src="https://i.ibb.co/fYJK7qpx/Screenshot-2026-02-25-17-20-56-535-com-x2premium-squawkkers.jpg" width="218"/> |
+| <img alt="Screenshot 1" src="https://i.ibb.co/JFn3NFz0/Screenshot-2026-02-25-17-20-46-532-com-x2premium-squawkkers.jpg" width="218"/> | <img alt="Screenshot 2" src="https://i.ibb.co/VYmpRG4x/Screenshot-2026-02-25-17-20-51-364-com-x2premium-squawkkers.jpg" width="218"/> | <img alt="Screenshot 3" src="https://i.ibb.co/S4xPyZRt/Screenshot-2026-02-25-17-20-56-535-com-x2premium-squawkkers.jpg" width="218"/> |
 
 ## Contribute
 If you'd like to help make Squawker even better, here are a just a few of the ways you can help!
