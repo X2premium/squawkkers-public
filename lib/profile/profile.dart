@@ -270,7 +270,7 @@ class _ProfileScreenBodyState extends State<ProfileScreenBody> with TickerProvid
         : ExtendedImage.network(banner, fit: BoxFit.fitWidth, height: bannerHeight);
 
     // The height of the app bar should be all the inner components, plus any margins
-    var appBarHeight = profileStuffTop + avatarHeight + metadataHeight + 8 + descriptionHeight;
+    var appBarHeight = profileStuffTop + avatarHeight + metadataHeight + 8 + descriptionHeight + kTextTabBarHeight;
 
     var metadataTextStyle = const TextStyle(fontSize: 12.5);
     var prefs = PrefService.of(context, listen: false);

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:pref/pref.dart';
 
 import 'package:squawker/client/client.dart';
 import 'package:squawker/client/client_account.dart';
-import 'package:squawker/constants.dart';
 import 'package:squawker/profile/profile.dart';
 import 'package:squawker/tweet/conversation.dart';
 import 'package:squawker/ui/cursor_paging.dart';
@@ -44,20 +42,14 @@ class _ProfileTweetsState extends State<ProfileTweets> with AutomaticKeepAliveCl
 
     try {
       TweetStatus result;
-      if (TwitterAccount.hasAccountAvailable()) {
-        if (PrefService.of(context).get(optionEnhancedProfile)) {
-          result = await Twitter.getUserWithProfileGraphql(widget.user.idStr!, widget.type, widget.pinnedTweets,
-            cursor: _pagingState.cursor, count: pageSize, includeReplies: widget.includeReplies);
-        }
-        else {
-          result = await Twitter.getTweets(widget.user.idStr!, widget.type, widget.pinnedTweets,
-            cursor: _pagingState.cursor, count: pageSize, includeReplies: widget.includeReplies);
-        }
-      }
-      else {
-        result = await Twitter.getUserWithProfileGraphql(widget.user.idStr!, widget.type, widget.pinnedTweets,
-          cursor: _pagingState.cursor, count: pageSize, includeReplies: widget.includeReplies);
-      }
+      result = await Twitter.getUserWithProfileGraphql(
+        widget.user.idStr!,
+        widget.type,
+        widget.pinnedTweets,
+        cursor: _pagingState.cursor,
+        count: pageSize,
+        includeReplies: widget.includeReplies,
+      );
 
       if (!mounted) {
         return;
