@@ -11,36 +11,25 @@
 
 <p align="center">
   <a href="https://github.com/X2premium/squawkkers-public/releases" alt="GitHub release"><img src="https://img.shields.io/github/release/X2premium/squawkkers-public.svg?style=for-the-badge" ></a>
-  <a href="https://f-droid.org/packages/org.ca.squawker" alt="GitHub release"><img src="https://img.shields.io/f-droid/v/org.ca.squawker?label=release%20(f-droid)&style=for-the-badge" ></a>
   <a href="https://github.com/X2premium/squawkkers-public/blob/master/LICENSE" alt="License: MIT"><img src="https://img.shields.io/badge/License-MIT-red.svg?style=for-the-badge"></a>
   <a href="https://github.com/X2premium/squawkkers-public/actions" alt="Build Status"><img src="https://img.shields.io/github/actions/workflow/status/X2premium/squawkkers-public/ci.yml?style=for-the-badge"></a>
   <a href="https://hosted.weblate.org/engage/squawker/" alt="Translation Status"><img src="https://img.shields.io/weblate/progress/squawker?label=Translated%20(squawker)&style=for-the-badge"></a>
 </p>
 <p align="center">
-  <a href="https://f-droid.org/packages/org.ca.squawker">
-    <img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" height="80">
+  <a href="https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22com.x2premium.squawkkers%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2FX2premium%2Fsquawkkers-public%22%2C%22author%22%3A%22X2premium%22%2C%22name%22%3A%22Squawker%22%2C%22preferredApkIndex%22%3A0%2C%22additionalSettings%22%3A%22%7B%5C%22includePrereleases%5C%22%3Atrue%2C%5C%22fallbackToOlderReleases%5C%22%3Atrue%2C%5C%22filterReleaseTitlesByRegEx%5C%22%3A%5C%22%5C%22%2C%5C%22filterReleaseNotesByRegEx%5C%22%3A%5C%22%5C%22%2C%5C%22verifyLatestTag%5C%22%3Atrue%2C%5C%22sortMethodChoice%5C%22%3A%5C%22date%5C%22%2C%5C%22useLatestAssetDateAsReleaseDate%5C%22%3Atrue%2C%5C%22releaseTitleAsVersion%5C%22%3Afalse%2C%5C%22trackOnly%5C%22%3Afalse%2C%5C%22versionExtractionRegEx%5C%22%3A%5C%22%5C%22%2C%5C%22matchGroupToUse%5C%22%3A%5C%22%5C%22%2C%5C%22versionDetection%5C%22%3Atrue%2C%5C%22releaseDateAsVersion%5C%22%3Afalse%2C%5C%22useVersionCodeAsOSVersion%5C%22%3Afalse%2C%5C%22apkFilterRegEx%5C%22%3A%5C%22%5C%22%2C%5C%22invertAPKFilter%5C%22%3Afalse%2C%5C%22autoApkFilterByArch%5C%22%3Atrue%2C%5C%22appName%5C%22%3A%5C%22squawkkers%20%5C%22%2C%5C%22appAuthor%5C%22%3A%5C%22CRYPTD777%5C%22%2C%5C%22shizukuPretendToBeGooglePlay%5C%22%3Afalse%2C%5C%22allowInsecure%5C%22%3Atrue%2C%5C%22exemptFromBackgroundUpdates%5C%22%3Afalse%2C%5C%22skipUpdateNotifications%5C%22%3Afalse%2C%5C%22about%5C%22%3A%5C%22%5C%22%2C%5C%22refreshBeforeDownload%5C%22%3Afalse%2C%5C%22includeZips%5C%22%3Afalse%2C%5C%22zippedApkFilterRegEx%5C%22%3A%5C%22%5C%22%2C%5C%22github-creds%5C%22%3A%5C%22%5C%22%2C%5C%22GHReqPrefix%5C%22%3A%5C%22%5C%22%7D%22%2C%22overrideSource%22%3A%22GitHub%22%7D">
+    <img src="https://raw.githubusercontent.com/ImranR98/Obtainium/main/assets/graphics/badge_obtainium.png" alt="Get it on Obtainium" height="80">
   </a>
 </p>
 
 ## Download (Public Release)
 
+* Install with Obtainium (one tap): https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22com.x2premium.squawkkers%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2FX2premium%2Fsquawkkers-public%22%2C%22author%22%3A%22X2premium%22%2C%22name%22%3A%22Squawker%22%2C%22preferredApkIndex%22%3A0%2C%22additionalSettings%22%3A%22%7B%5C%22includePrereleases%5C%22%3Atrue%2C%5C%22fallbackToOlderReleases%5C%22%3Atrue%2C%5C%22filterReleaseTitlesByRegEx%5C%22%3A%5C%22%5C%22%2C%5C%22filterReleaseNotesByRegEx%5C%22%3A%5C%22%5C%22%2C%5C%22verifyLatestTag%5C%22%3Atrue%2C%5C%22sortMethodChoice%5C%22%3A%5C%22date%5C%22%2C%5C%22useLatestAssetDateAsReleaseDate%5C%22%3Atrue%2C%5C%22releaseTitleAsVersion%5C%22%3Afalse%2C%5C%22trackOnly%5C%22%3Afalse%2C%5C%22versionExtractionRegEx%5C%22%3A%5C%22%5C%22%2C%5C%22matchGroupToUse%5C%22%3A%5C%22%5C%22%2C%5C%22versionDetection%5C%22%3Atrue%2C%5C%22releaseDateAsVersion%5C%22%3Afalse%2C%5C%22useVersionCodeAsOSVersion%5C%22%3Afalse%2C%5C%22apkFilterRegEx%5C%22%3A%5C%22%5C%22%2C%5C%22invertAPKFilter%5C%22%3Afalse%2C%5C%22autoApkFilterByArch%5C%22%3Atrue%2C%5C%22appName%5C%22%3A%5C%22squawkkers%20%5C%22%2C%5C%22appAuthor%5C%22%3A%5C%22CRYPTD777%5C%22%2C%5C%22shizukuPretendToBeGooglePlay%5C%22%3Afalse%2C%5C%22allowInsecure%5C%22%3Atrue%2C%5C%22exemptFromBackgroundUpdates%5C%22%3Afalse%2C%5C%22skipUpdateNotifications%5C%22%3Afalse%2C%5C%22about%5C%22%3A%5C%22%5C%22%2C%5C%22refreshBeforeDownload%5C%22%3Afalse%2C%5C%22includeZips%5C%22%3Afalse%2C%5C%22zippedApkFilterRegEx%5C%22%3A%5C%22%5C%22%2C%5C%22github-creds%5C%22%3A%5C%22%5C%22%2C%5C%22GHReqPrefix%5C%22%3A%5C%22%5C%22%7D%22%2C%22overrideSource%22%3A%22GitHub%22%7D
 * Latest release page: https://github.com/X2premium/squawkkers-public/releases/latest
 * Latest universal APK: https://github.com/X2premium/squawkkers-public/releases/latest/download/squawkkers-universal.apk
 * Current app version: `3.8.9` (build `52`)
 
 <p align="center">
-  There is also an alternate F-Droid repository that allows updates for Squawker to be available faster than on the default F-Droid repository.
-</p>
-<p align="left">
-  Scan the QR code below or click this <a href="https://apkrep.creativaxion.org/fdroid/repo?fingerprint=443DA0A316DFB86BFD05D0123951855E7CD8724969FAD66D6E62EB801299744A">link</a> and process it with your F-Droid client. Here's the full link text for easy viewing:<br>
-    https://apkrep.creativaxion.org/fdroid/repo?fingerprint=443DA0A316DFB86BFD05D0123951855E7CD8724969FAD66D6E62EB801299744A
-</p>
-<p align="left">
-  <img src="https://apkrep.creativaxion.org/fdroid/repo/index.png" width="80">
-</p>
-<p align="center">
- <sub>Important note: In case Squawker is already installed on your device and you want to reinstall it or want to install a version from another repository (from F-Droid to github or from F-Droid to the alternate F-Droid repository for instance), make sure to backup your application data (Settings/Data, tap Export, select all items then tap the save icon) and uninstall Squawker before proceeding.
-  After you have reinstalled Squawker from the new repository, import your backup (Settings/Data, tap Import).</sub>
+ <sub>Important note: If you are switching install source (for example from direct APK to Obtainium), backup your app data first (Settings/Data, tap Export), then reinstall and import the backup (Settings/Data, tap Import).</sub>
 </p>
 
 ## This Fork: Fixes & Enhancements
