@@ -2,7 +2,7 @@
 <br>
 <p align="center">
   <a href="https://github.com/X2premium/squawkkers-public">
-    <img alt="Squawker" title="Squawker" src="fastlane/metadata/android/en-US/images/icon.png" width="144">
+    <img alt="Squawker" title="Squawker" src="android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.png" width="144">
   </a>
 </p>
 <p align="center">
