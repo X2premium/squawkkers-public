@@ -22,6 +22,7 @@ import 'package:squawker/ui/dates.dart';
 import 'package:squawker/ui/errors.dart';
 import 'package:squawker/user.dart';
 import 'package:squawker/utils/data_service.dart';
+import 'package:squawker/utils/downloads.dart';
 import 'package:squawker/utils/iterables.dart';
 import 'package:squawker/utils/misc.dart';
 import 'package:squawker/utils/route_util.dart';
@@ -344,6 +345,120 @@ class TweetTileState extends State<TweetTile> with SingleTickerProviderStateMixi
       onPressed: onPressed,
       label: Text(label, style: TextStyle(color: color, fontSize: 14)),
     );
+  }
+
+  void _showDownloadUnavailable() {
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(L10n.current.download_media_no_url),
+    ));
+  }
+
+  Uri? _getDownloadUriForMedia(Media media, {required bool downloadBestVideoQuality}) {
+    var mediaUrl = media.mediaUrlHttps;
+    if (media.type == 'photo' && mediaUrl != null) {
+      return Uri.parse('$mediaUrl:orig');
+    }
+
+    if (media.type == 'video' || media.type == 'animated_gif') {
+      var variants = media.videoInfo?.variants ?? [];
+
+      var mp4Variants = variants
+          .where((e) => e.url != null)
+          .where((e) => e.contentType == 'video/mp4')
+          .toList(growable: false);
+
+      var rankedMp4Variants = mp4Variants
+          .where((e) => e.bitrate != null)
+          .sorted((a, b) => downloadBestVideoQuality
+              ? b.bitrate!.compareTo(a.bitrate!)
+              : a.bitrate!.compareTo(b.bitrate!))
+          .toList(growable: false);
+
+      var url = rankedMp4Variants.map((e) => e.url).firstWhereOrNull((e) => e != null) ??
+          mp4Variants.map((e) => e.url).firstWhereOrNull((e) => e != null) ??
+          variants.map((e) => e.url).firstWhereOrNull((e) => e != null);
+      if (url != null) {
+        return Uri.parse(url);
+      }
+    }
+
+    if (mediaUrl != null) {
+      return Uri.parse(mediaUrl);
+    }
+
+    return null;
+  }
+
+  String _indexFileName(String baseName, int index, int total) {
+    if (total <= 1) {
+      return baseName;
+    }
+
+    var lastDot = baseName.lastIndexOf('.');
+    if (lastDot > 0) {
+      return '${baseName.substring(0, lastDot)}-${index + 1}${baseName.substring(lastDot)}';
+    }
+
+    return '$baseName-${index + 1}';
+  }
+
+  Future<void> _onClickDownloadFromTweet(TweetWithCard tweet) async {
+    var mediaItems = tweet.extendedEntities?.media;
+    if (mediaItems == null || mediaItems.isEmpty) {
+      _showDownloadUnavailable();
+      return;
+    }
+
+    bool downloadBestVideoQuality = PrefService.of(context).get(optionDownloadBestVideoQuality);
+
+    var username = tweet.user?.screenName ?? 'media';
+    var downloadJobs = <MapEntry<Uri, String>>[];
+
+    for (int i = 0; i < mediaItems.length; i++) {
+      var media = mediaItems[i];
+      var uri = _getDownloadUriForMedia(media, downloadBestVideoQuality: downloadBestVideoQuality);
+      if (uri != null) {
+        var fileBasename = 'media';
+        if (uri.pathSegments.isNotEmpty && uri.pathSegments.last.isNotEmpty) {
+          fileBasename = uri.pathSegments.last;
+        }
+        fileBasename = _indexFileName(fileBasename, i, mediaItems.length);
+        downloadJobs.add(MapEntry(uri, '$username-$fileBasename'));
+      }
+    }
+
+    if (downloadJobs.isEmpty) {
+      _showDownloadUnavailable();
+      return;
+    }
+
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(L10n.of(context).downloading_media),
+    ));
+
+    int savedCount = 0;
+    for (var job in downloadJobs) {
+      await downloadUriToPickedFile(
+        context,
+        job.key,
+        job.value,
+        onStart: () {},
+        onSuccess: () {
+          savedCount++;
+        },
+      );
+    }
+
+    if (!mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(savedCount > 0 ? L10n.of(context).successfully_saved_the_media : L10n.current.download_media_no_url),
+    ));
   }
 
   Widget _contextMenuBuilder(BuildContext context, EditableTextState editableTextState) {
@@ -759,6 +874,10 @@ class TweetTileState extends State<TweetTile> with SingleTickerProviderStateMixi
                               if (tweet.favoriteCount != null)
                                 _createFooterTextButton(
                                     Symbols.favorite_border, numberFormat.format(tweet.favoriteCount)),
+                              if (tweet.extendedEntities?.media?.isNotEmpty ?? false)
+                                _createFooterIconButton(Symbols.download_rounded, null, null, () async {
+                                  await _onClickDownloadFromTweet(tweet);
+                                }),
                               const SizedBox(
                                 width: 8.0,
                               ),
