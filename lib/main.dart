@@ -239,7 +239,9 @@ Future<void> main() async {
     defaults: {
       optionDisableScreenshots: false,
       optionDownloadPath: '',
-      optionDownloadType: optionDownloadTypeAsk,
+      optionDownloadType: Platform.isAndroid
+          ? optionDownloadTypeDirectory
+          : optionDownloadTypeAsk,
       optionHomePages: defaultHomePages.map((e) => e.id).toList(),
       optionLocale: optionLocaleDefault,
       optionHomeInitialTab: 'feed',
@@ -279,6 +281,14 @@ Future<void> main() async {
       }),
     },
   );
+
+  if (Platform.isAndroid) {
+    var downloadType = prefService.get<String>(optionDownloadType);
+    var downloadPath = prefService.get<String>(optionDownloadPath) ?? '';
+    if (downloadType == optionDownloadTypeAsk && downloadPath.isEmpty) {
+      await prefService.set(optionDownloadType, optionDownloadTypeDirectory);
+    }
+  }
 
   await AccentUtil.load();
 

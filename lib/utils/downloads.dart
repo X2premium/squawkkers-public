@@ -14,6 +14,9 @@ import 'package:pref/pref.dart';
 const MethodChannel _flutterFileDialogChannel = MethodChannel(
   'flutter_file_dialog',
 );
+const MethodChannel _androidInfoChannel = MethodChannel(
+  'squawker/android_info',
+);
 
 Future<void> downloadUriToPickedFile(
   BuildContext context,
@@ -22,7 +25,10 @@ Future<void> downloadUriToPickedFile(
   required Function() onStart,
   required Function() onSuccess,
 }) async {
-  var sanitizedFilename = fileName.split("?")[0];
+  var sanitizedFilename = p.basename(fileName.split("?")[0]);
+  if (sanitizedFilename.isEmpty) {
+    sanitizedFilename = 'download';
+  }
 
   try {
     onStart();
@@ -38,7 +44,7 @@ Future<void> downloadUriToPickedFile(
     final downloadPath = downloadPathPref is String ? downloadPathPref : '';
 
     // If the user wants to pick a file every time a download happens
-    if (downloadType == optionDownloadTypeAsk || downloadPath == '') {
+    if (downloadType == optionDownloadTypeAsk) {
       var fileInfo = await FlutterFileDialog.saveFile(
         params: SaveFileDialogParams(
           fileName: sanitizedFilename,
@@ -54,7 +60,14 @@ Future<void> downloadUriToPickedFile(
     }
 
     bool saved = false;
-    if (downloadPath.startsWith(optionDownloadPathDirectoryUriPrefix)) {
+    if (Platform.isAndroid && downloadPath.isEmpty) {
+      final savedToDownloads = await _saveFileToAndroidDownloads(
+        data: response,
+        fileName: sanitizedFilename,
+        mimeType: _guessMimeType(sanitizedFilename, uri),
+      );
+      saved = savedToDownloads != null;
+    } else if (downloadPath.startsWith(optionDownloadPathDirectoryUriPrefix)) {
       final savedToPickedDirectory = await _saveFileToDirectoryUri(
         directoryUri: downloadPath.substring(
           optionDownloadPathDirectoryUriPrefix.length,
@@ -70,6 +83,15 @@ Future<void> downloadUriToPickedFile(
         fileName: sanitizedFilename,
         data: response,
       );
+    }
+
+    if (!saved && Platform.isAndroid) {
+      final savedToDownloads = await _saveFileToAndroidDownloads(
+        data: response,
+        fileName: sanitizedFilename,
+        mimeType: _guessMimeType(sanitizedFilename, uri),
+      );
+      saved = savedToDownloads != null;
     }
 
     if (!saved) {
@@ -90,6 +112,21 @@ Future<void> downloadUriToPickedFile(
     onSuccess();
   } catch (e) {
     showSnackBar(context, icon: '🙊', message: e.toString());
+  }
+}
+
+Future<String?> _saveFileToAndroidDownloads({
+  required Uint8List data,
+  required String fileName,
+  required String mimeType,
+}) async {
+  try {
+    return await _androidInfoChannel.invokeMethod<String>(
+      'saveBytesToDownloads',
+      {'data': data, 'fileName': fileName, 'mimeType': mimeType},
+    );
+  } catch (_) {
+    return null;
   }
 }
 

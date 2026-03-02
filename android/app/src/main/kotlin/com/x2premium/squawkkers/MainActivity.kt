@@ -2,11 +2,16 @@ package com.x2premium.squawkkers
 
 import android.Manifest
 import android.app.Activity
+import android.content.ContentValues
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
+import android.media.MediaScannerConnection
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Environment
+import android.provider.MediaStore
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
@@ -14,6 +19,8 @@ import androidx.core.content.ContextCompat
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import java.io.File
+import java.io.FileOutputStream
 
 class MainActivity: FlutterActivity() {
 
@@ -74,6 +81,22 @@ class MainActivity: FlutterActivity() {
                 "requestPostNotificationsPermissions" -> {
                     requestPostNotificationsPermissions()
                     result.success(true)
+                }
+                "saveBytesToDownloads" -> {
+                    val data = call.argument<ByteArray>("data")
+                    val fileName = call.argument<String>("fileName")
+                    val mimeType = call.argument<String>("mimeType")
+
+                    if (data == null || fileName.isNullOrBlank()) {
+                        result.error("invalid_arguments", "Missing 'data' or 'fileName'", null)
+                    } else {
+                        val savedUri = saveBytesToDownloads(data, fileName, mimeType)
+                        if (savedUri == null) {
+                            result.error("save_failed", "Unable to save media in Downloads", null)
+                        } else {
+                            result.success(savedUri)
+                        }
+                    }
                 }
                 else -> result.notImplemented()
             }
@@ -153,4 +176,64 @@ class MainActivity: FlutterActivity() {
         }
     }
 
+    private fun saveBytesToDownloads(data: ByteArray, fileName: String, mimeType: String?): String? {
+        val resolvedMimeType = if (mimeType.isNullOrBlank()) "application/octet-stream" else mimeType
+
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            saveBytesToDownloadsScoped(data, fileName, resolvedMimeType)
+        } else {
+            saveBytesToDownloadsLegacy(data, fileName, resolvedMimeType)
+        }
+    }
+
+    private fun saveBytesToDownloadsScoped(data: ByteArray, fileName: String, mimeType: String): String? {
+        val resolver = contentResolver
+        val values = ContentValues().apply {
+            put(MediaStore.Downloads.DISPLAY_NAME, fileName)
+            put(MediaStore.Downloads.MIME_TYPE, mimeType)
+            put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+            put(MediaStore.Downloads.IS_PENDING, 1)
+        }
+
+        val itemUri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values) ?: return null
+        return try {
+            resolver.openOutputStream(itemUri)?.use { output ->
+                output.write(data)
+            } ?: return null
+
+            val updateValues = ContentValues().apply {
+                put(MediaStore.Downloads.IS_PENDING, 0)
+            }
+            resolver.update(itemUri, updateValues, null, null)
+            itemUri.toString()
+        } catch (_: Exception) {
+            resolver.delete(itemUri, null, null)
+            null
+        }
+    }
+
+    @Suppress("DEPRECATION")
+    private fun saveBytesToDownloadsLegacy(data: ByteArray, fileName: String, mimeType: String): String? {
+        return try {
+            val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+            if (!downloadsDir.exists() && !downloadsDir.mkdirs()) {
+                return null
+            }
+
+            val targetFile = File(downloadsDir, fileName)
+            FileOutputStream(targetFile).use { output ->
+                output.write(data)
+            }
+
+            MediaScannerConnection.scanFile(
+                this,
+                arrayOf(targetFile.absolutePath),
+                arrayOf(mimeType),
+                null
+            )
+            Uri.fromFile(targetFile).toString()
+        } catch (_: Exception) {
+            null
+        }
+    }
 }
