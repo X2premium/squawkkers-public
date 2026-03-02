@@ -1,4 +1,4 @@
-<h1 align="center"> Squawker </h1>
+<h1 align="center"> Squawkker </h1>
 <br>
 <p align="center">
   <a href="https://github.com/X2premium/squawkkers-public">
