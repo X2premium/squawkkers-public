@@ -357,7 +357,7 @@ class TweetTileState extends State<TweetTile> with SingleTickerProviderStateMixi
   Uri? _getDownloadUriForMedia(Media media, {required bool downloadBestVideoQuality}) {
     var mediaUrl = media.mediaUrlHttps;
     if (media.type == 'photo' && mediaUrl != null) {
-      return Uri.parse('$mediaUrl:orig');
+      return buildBestPhotoDownloadUri(mediaUrl);
     }
 
     if (media.type == 'video' || media.type == 'animated_gif') {

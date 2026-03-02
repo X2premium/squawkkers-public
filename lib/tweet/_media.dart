@@ -227,7 +227,7 @@ class _TweetMediaViewState extends State<TweetMediaView> {
             onPressed: () async {
               var url = path.basename(_media.mediaUrlHttps!);
               var fileName = '${widget.username}-$url';
-              var uri = Uri.parse('${_media.mediaUrlHttps}:orig');
+              var uri = buildBestPhotoDownloadUri(_media.mediaUrlHttps!);
 
               await downloadUriToPickedFile(
                 context,
@@ -254,7 +254,7 @@ class _TweetMediaViewState extends State<TweetMediaView> {
               return IconButton(onPressed: callback, icon: child);
             },
             onPressed: () async {
-              var uri = Uri.parse('${_media.mediaUrlHttps}:orig');
+              var uri = buildBestPhotoDownloadUri(_media.mediaUrlHttps!);
 
               Uint8List? fileBytes = await downloadFile(context, uri);
 
@@ -346,7 +346,7 @@ class _TweetPhotoViewState extends State<TweetPhotoView> {
             onPressed: () async {
               var url = path.basename(widget.url);
               var fileName = '${widget.username}-$url';
-              var uri = Uri.parse(widget.url);
+              var uri = buildBestPhotoDownloadUri(widget.url);
 
               await downloadUriToPickedFile(
                 context,
@@ -373,7 +373,7 @@ class _TweetPhotoViewState extends State<TweetPhotoView> {
               return IconButton(onPressed: callback, icon: child);
             },
             onPressed: () async {
-              var uri = Uri.parse(widget.url);
+              var uri = buildBestPhotoDownloadUri(widget.url);
 
               Uint8List? fileBytes = await downloadFile(context, uri);
 

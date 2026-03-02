@@ -25,10 +25,7 @@ Future<void> downloadUriToPickedFile(
   required Function() onStart,
   required Function() onSuccess,
 }) async {
-  var sanitizedFilename = p.basename(fileName.split("?")[0]);
-  if (sanitizedFilename.isEmpty) {
-    sanitizedFilename = 'download';
-  }
+  var sanitizedFilename = _sanitizeFilename(fileName, uri);
 
   try {
     onStart();
@@ -173,6 +170,12 @@ String _guessMimeType(String fileName, Uri uri) {
   if (extension.isEmpty) {
     extension = p.extension(uri.path).toLowerCase();
   }
+  if (extension.isEmpty) {
+    var formatExtension = _getExtensionFromUriFormat(uri);
+    if (formatExtension != null) {
+      extension = '.$formatExtension';
+    }
+  }
 
   switch (extension) {
     case '.jpg':
@@ -199,6 +202,57 @@ String _guessMimeType(String fileName, Uri uri) {
     default:
       return 'application/octet-stream';
   }
+}
+
+String _sanitizeFilename(String fileName, Uri uri) {
+  var sanitized = p.basename(fileName.split("?")[0]);
+  sanitized = sanitized.replaceFirst(RegExp(r':[A-Za-z0-9_]+$'), '');
+  sanitized = sanitized.replaceAll(RegExp(r'[<>:"/\\|?*\x00-\x1F]'), '_').trim();
+  if (sanitized.isEmpty) {
+    sanitized = 'download';
+  }
+
+  if (p.extension(sanitized).isEmpty) {
+    var formatExtension = _getExtensionFromUriFormat(uri);
+    if (formatExtension != null) {
+      sanitized = '$sanitized.$formatExtension';
+    }
+  }
+
+  return sanitized;
+}
+
+String? _getExtensionFromUriFormat(Uri uri) {
+  var format = uri.queryParameters['format'];
+  if (format == null || format.isEmpty) {
+    return null;
+  }
+
+  format = format.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
+  if (format.isEmpty) {
+    return null;
+  }
+
+  if (format == 'jpeg') {
+    return 'jpg';
+  }
+
+  return format;
+}
+
+Uri buildBestPhotoDownloadUri(String mediaUrl) {
+  var parsed = Uri.parse(mediaUrl);
+  var format = parsed.queryParameters['format'];
+  if (format != null && format.isNotEmpty) {
+    var queryParameters = Map<String, String>.from(parsed.queryParameters);
+    queryParameters['name'] = 'orig';
+    return parsed.replace(queryParameters: queryParameters);
+  }
+
+  var path = parsed.path.contains(':')
+      ? parsed.path.replaceFirst(RegExp(r':[A-Za-z0-9_]+$'), ':orig')
+      : '${parsed.path}:orig';
+  return parsed.replace(path: path);
 }
 
 class UnableToSaveMedia {
