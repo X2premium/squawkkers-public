@@ -1,20 +1,27 @@
 import 'dart:io';
-import 'dart:typed_data';
 
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_file_dialog/flutter_file_dialog.dart';
+import 'package:flutter/services.dart';
 import 'package:media_scanner/media_scanner.dart';
 import 'package:squawker/client/app_http_client.dart';
 import 'package:squawker/constants.dart';
 import 'package:squawker/generated/l10n.dart';
 import 'package:squawker/ui/errors.dart';
 import 'package:path/path.dart' as p;
-import 'package:permission_handler/permission_handler.dart';
 import 'package:pref/pref.dart';
 
-Future<void> downloadUriToPickedFile(BuildContext context, Uri uri, String fileName,
-    {required Function() onStart, required Function() onSuccess}) async {
+const MethodChannel _flutterFileDialogChannel = MethodChannel(
+  'flutter_file_dialog',
+);
+
+Future<void> downloadUriToPickedFile(
+  BuildContext context,
+  Uri uri,
+  String fileName, {
+  required Function() onStart,
+  required Function() onSuccess,
+}) async {
   var sanitizedFilename = fileName.split("?")[0];
 
   try {
@@ -27,12 +34,17 @@ Future<void> downloadUriToPickedFile(BuildContext context, Uri uri, String fileN
     }
 
     final downloadType = PrefService.of(context).get(optionDownloadType);
-    final downloadPath = PrefService.of(context).get(optionDownloadPath);
+    final downloadPathPref = PrefService.of(context).get(optionDownloadPath);
+    final downloadPath = downloadPathPref is String ? downloadPathPref : '';
 
     // If the user wants to pick a file every time a download happens
     if (downloadType == optionDownloadTypeAsk || downloadPath == '') {
-      var fileInfo =
-          await FlutterFileDialog.saveFile(params: SaveFileDialogParams(fileName: sanitizedFilename, data: response));
+      var fileInfo = await FlutterFileDialog.saveFile(
+        params: SaveFileDialogParams(
+          fileName: sanitizedFilename,
+          data: response,
+        ),
+      );
       if (fileInfo == null) {
         return;
       }
@@ -41,42 +53,114 @@ Future<void> downloadUriToPickedFile(BuildContext context, Uri uri, String fileN
       return;
     }
 
-    PermissionStatus storagePermission = PermissionStatus.granted;
-    if (Platform.isAndroid) {
-      DeviceInfoPlugin plugin = DeviceInfoPlugin();
-      AndroidDeviceInfo android = await plugin.androidInfo;
-      storagePermission = android.version.sdkInt < 30
-          ? await Permission.storage.request()
-          : await Permission.manageExternalStorage.request();
+    bool saved = false;
+    if (downloadPath.startsWith(optionDownloadPathDirectoryUriPrefix)) {
+      final savedToPickedDirectory = await _saveFileToDirectoryUri(
+        directoryUri: downloadPath.substring(
+          optionDownloadPathDirectoryUriPrefix.length,
+        ),
+        data: response,
+        fileName: sanitizedFilename,
+        mimeType: _guessMimeType(sanitizedFilename, uri),
+      );
+      saved = savedToPickedDirectory != null;
+    } else {
+      saved = await _saveFileToPath(
+        downloadPath: downloadPath,
+        fileName: sanitizedFilename,
+        data: response,
+      );
     }
 
-    // Otherwise, check we have the storage permission
-    if (!storagePermission.isGranted) {
-      // If directory writing permission isn't granted, fall back to manual save dialog.
-      var fileInfo =
-          await FlutterFileDialog.saveFile(params: SaveFileDialogParams(fileName: sanitizedFilename, data: response));
+    if (!saved) {
+      // Legacy absolute paths may fail on scoped storage. Fall back to save dialog.
+      var fileInfo = await FlutterFileDialog.saveFile(
+        params: SaveFileDialogParams(
+          fileName: sanitizedFilename,
+          data: response,
+        ),
+      );
       if (fileInfo != null) {
         onSuccess();
         return;
       }
-
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(L10n.current.permission_not_granted),
-      ));
       return;
     }
 
-    // Finally, save to the user-defined directory
-    var savedFile = p.join(downloadPath, sanitizedFilename);
-    await Directory(downloadPath).create(recursive: true);
-    await File(savedFile).writeAsBytes(response);
-    if (Platform.isAndroid) {
-      MediaScanner.loadMedia(path: savedFile);
-    }
     onSuccess();
   } catch (e) {
     showSnackBar(context, icon: '🙊', message: e.toString());
+  }
+}
+
+Future<bool> _saveFileToPath({
+  required String downloadPath,
+  required String fileName,
+  required Uint8List data,
+}) async {
+  try {
+    var savedFile = p.join(downloadPath, fileName);
+    await Directory(downloadPath).create(recursive: true);
+    await File(savedFile).writeAsBytes(data);
+    if (Platform.isAndroid) {
+      MediaScanner.loadMedia(path: savedFile);
+    }
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
+Future<String?> _saveFileToDirectoryUri({
+  required String directoryUri,
+  required Uint8List data,
+  required String fileName,
+  required String mimeType,
+}) async {
+  try {
+    return await _flutterFileDialogChannel
+        .invokeMethod<String>('saveFileToDirectory', {
+          'directory': directoryUri,
+          'data': data,
+          'fileName': fileName,
+          'mimeType': mimeType,
+          'replace': true,
+        });
+  } catch (_) {
+    return null;
+  }
+}
+
+String _guessMimeType(String fileName, Uri uri) {
+  var extension = p.extension(fileName).toLowerCase();
+  if (extension.isEmpty) {
+    extension = p.extension(uri.path).toLowerCase();
+  }
+
+  switch (extension) {
+    case '.jpg':
+    case '.jpeg':
+      return 'image/jpeg';
+    case '.png':
+      return 'image/png';
+    case '.gif':
+      return 'image/gif';
+    case '.webp':
+      return 'image/webp';
+    case '.mp4':
+      return 'video/mp4';
+    case '.webm':
+      return 'video/webm';
+    case '.mov':
+      return 'video/quicktime';
+    case '.m4v':
+      return 'video/x-m4v';
+    case '.mp3':
+      return 'audio/mpeg';
+    case '.m4a':
+      return 'audio/mp4';
+    default:
+      return 'application/octet-stream';
   }
 }
 
@@ -95,12 +179,15 @@ class UnableToSaveMedia {
 Future<Uint8List?> downloadFile(BuildContext context, Uri uri) async {
   var response = await AppHttpClient.httpGet(uri);
   if (response.statusCode != 200) {
-    response = await AppHttpClient.httpGet(uri, headers: {
-      'User-Agent': 'Mozilla/5.0',
-      'Referer': 'https://x.com/',
-      'Origin': 'https://x.com',
-      'Accept': '*/*',
-    });
+    response = await AppHttpClient.httpGet(
+      uri,
+      headers: {
+        'User-Agent': 'Mozilla/5.0',
+        'Referer': 'https://x.com/',
+        'Origin': 'https://x.com',
+        'Accept': '*/*',
+      },
+    );
   }
 
   if (response.statusCode == 200) {
@@ -108,11 +195,17 @@ Future<Uint8List?> downloadFile(BuildContext context, Uri uri) async {
   }
 
   ScaffoldMessenger.of(context).clearSnackBars();
-  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-    content: Text(
-      L10n.of(context).unable_to_save_the_media_twitter_returned_a_status_of_response_statusCode(response.statusCode),
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(
+        L10n.of(
+          context,
+        ).unable_to_save_the_media_twitter_returned_a_status_of_response_statusCode(
+          response.statusCode,
+        ),
+      ),
     ),
-  ));
+  );
 
   return null;
 }

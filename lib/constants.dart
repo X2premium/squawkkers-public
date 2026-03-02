@@ -18,6 +18,7 @@ const optionMediaAllowBackgroundPlayOtherApps = 'media.allow_background_play.oth
 
 const optionDownloadType = 'download.type';
 const optionDownloadPath = 'download.path';
+const optionDownloadPathDirectoryUriPrefix = 'ffd:';
 
 const optionDownloadBestVideoQuality = 'download_best_video_quality';
 
