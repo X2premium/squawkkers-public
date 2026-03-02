@@ -1,6 +1,5 @@
-import 'package:device_info_plus/device_info_plus.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_file_dialog/flutter_file_dialog.dart';
 import 'package:flutter_localized_locales/flutter_localized_locales.dart';
 import 'package:flutter_swipe_action_cell/flutter_swipe_action_cell.dart';
 import 'package:material_symbols_icons/symbols.dart';
@@ -15,7 +14,6 @@ import 'package:squawker/utils/iterables.dart';
 import 'package:squawker/utils/misc.dart';
 import 'package:squawker/utils/translation.dart';
 import 'package:logging/logging.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:pref/pref.dart';
 
 class SettingLocale {
@@ -395,6 +393,18 @@ class DownloadTypeSetting extends StatefulWidget {
 }
 
 class DownloadTypeSettingState extends State<DownloadTypeSetting> {
+  String getDownloadPathLabel(String downloadPath) {
+    if (downloadPath.isEmpty) {
+      return L10n.current.not_set;
+    }
+
+    if (downloadPath.startsWith(optionDownloadPathDirectoryUriPrefix)) {
+      return L10n.current.download_handling_type_directory;
+    }
+
+    return downloadPath;
+  }
+
   @override
   Widget build(BuildContext context) {
     var downloadPath = PrefService.of(context).get<String>(optionDownloadPath) ?? '';
@@ -418,36 +428,30 @@ class DownloadTypeSettingState extends State<DownloadTypeSetting> {
         if (PrefService.of(context).get(optionDownloadType) == optionDownloadTypeDirectory)
           PrefButton(
             onTap: () async {
-              DeviceInfoPlugin plugin = DeviceInfoPlugin();
-              AndroidDeviceInfo android = await plugin.androidInfo;
-              var storagePermission = android.version.sdkInt < 30
-                  ? await Permission.storage.request()
-                  : await Permission.manageExternalStorage.request();
-              if (storagePermission.isGranted) {
-                String? directoryPath = await FilePicker.platform.getDirectoryPath();
-                if (directoryPath == null) {
-                  return;
-                }
-
-                // TODO: Gross. Figure out how to re-render automatically when the preference changes
-                setState(() {
-                  PrefService.of(context).set(optionDownloadPath, directoryPath);
-                });
-              } else if (storagePermission.isPermanentlyDenied) {
-                await openAppSettings();
-              } else {
+              if (!await FlutterFileDialog.isPickDirectorySupported()) {
                 ScaffoldMessenger.of(context).clearSnackBars();
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text(L10n.current.permission_not_granted),
-                    action: SnackBarAction(
-                      label: L10n.current.open_app_settings,
-                      onPressed: openAppSettings,
-                    )));
+                  content: Text(L10n.current.functionality_unsupported),
+                ));
+                return;
               }
+
+              var pickedDirectory = await FlutterFileDialog.pickDirectory();
+              if (pickedDirectory == null) {
+                return;
+              }
+
+              // TODO: Gross. Figure out how to re-render automatically when the preference changes
+              setState(() {
+                PrefService.of(context).set(
+                  optionDownloadPath,
+                  '$optionDownloadPathDirectoryUriPrefix${pickedDirectory.toString()}',
+                );
+              });
             },
             title: Text(L10n.current.download_path),
             subtitle: Text(
-              downloadPath.isEmpty ? L10n.current.not_set : downloadPath,
+              getDownloadPathLabel(downloadPath),
             ),
             child: Text(L10n.current.choose),
           )
