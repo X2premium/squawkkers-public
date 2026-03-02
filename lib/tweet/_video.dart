@@ -133,6 +133,8 @@ class _TweetVideoState extends State<TweetVideo> with AutomaticKeepAliveClientMi
     _chewieController = ChewieController(
       // TODO disable full screen temporarily because of bug
       allowFullScreen: false,
+      // Download action is exposed through additionalOptions; keep the menu visible.
+      showOptions: true,
       aspectRatio: widget.metadata.aspectRatio,
       autoInitialize: true,
       autoPlay: true,
